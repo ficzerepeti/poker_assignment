@@ -1,6 +1,20 @@
 #include <iostream>
 
+#include "OMPEval/omp/CardRange.h"
+#include "OMPEval/omp/EquityCalculator.h"
+
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    omp::EquityCalculator eq;
+
+    const std::vector<omp::CardRange> hands = { "Ad Qh", "random", "random", "random", "random", "random"};
+    const auto board = omp::CardRange::getCardMask("Qd Th 2d");
+    const auto dead = omp::CardRange::getCardMask("");
+
+    eq.start(hands, board, dead, false);
+    eq.wait();
+
+    const auto &result = eq.getResults();
+
+    std::cout << "First player wins " << result.equity[0] << std::endl;
     return 0;
 }

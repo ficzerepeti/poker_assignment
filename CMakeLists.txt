@@ -23,6 +23,7 @@ set(OMPEvalFiles
 add_library(libOMPEval STATIC ${OMPEvalFiles} ${LibDivideFiles})
 
 add_executable(poker_assignment main.cpp)
+target_link_libraries(poker_assignment libOMPEval)
 
 add_executable(ompeval_test
         "${CMAKE_CURRENT_LIST_DIR}/OMPEval/benchmark.cpp"
