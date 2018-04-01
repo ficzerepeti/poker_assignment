@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "OMPEval/omp/CardRange.h"
-#include "OMPEval/omp/EquityCalculator.h"
+#include "omp/CardRange.h"
+#include "omp/EquityCalculator.h"
 
 int main() {
     omp::EquityCalculator eq;
