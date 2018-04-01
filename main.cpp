@@ -2,19 +2,14 @@
 
 #include "omp/CardRange.h"
 #include "omp/EquityCalculator.h"
+#include "equity_calculator.h"
 
-int main() {
-    omp::EquityCalculator eq;
+int main()
+{
+    poker_lib::equity_calculator eq;
 
-    const std::vector<omp::CardRange> hands = { "Ad Qh", "random", "random", "random", "random", "random"};
-    const auto board = omp::CardRange::getCardMask("Qd Th 2d");
-    const auto dead = omp::CardRange::getCardMask("");
+    const auto result = eq.calculate_equities({ "Ad Qh", "random", "random", "random", "random", "random"}, "Qd Th 2d");
 
-    eq.start(hands, board, dead, false);
-    eq.wait();
-
-    const auto &result = eq.getResults();
-
-    std::cout << "First player wins " << result.equity[0] << std::endl;
+    std::cout << "First player has " << (result.at(0) * 100) << "% chance to win" << std::endl;
     return 0;
 }
