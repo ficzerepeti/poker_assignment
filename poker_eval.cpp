@@ -1,11 +1,11 @@
 #include <omp/CardRange.h>
 #include <omp/EquityCalculator.h>
 #include <sstream>
-#include "equity_calculator.h"
+#include "poker_eval.h"
 
 namespace poker_lib {
 
-std::vector<double> equity_calculator::calculate_equities(const std::vector<std::string> &hands,
+std::vector<double> poker_eval::calculate_equities(const std::vector<std::string> &hands,
                                                           const std::string &board)
 {
     if (hands.size() > omp::MAX_PLAYERS)
@@ -27,6 +27,13 @@ std::vector<double> equity_calculator::calculate_equities(const std::vector<std:
 
     const auto &result = eq.getResults();
     return {result.equity, result.equity + hands.size()};
+}
+
+double poker_eval::calculate_pot_percentage(uint64_t pot, uint64_t raise)
+{
+    const auto pot_d = static_cast<double>(pot);
+    const auto raise_d = static_cast<double>(raise);
+    return raise_d / (pot_d + raise_d);
 }
 
 } // end of namespace poker_lib

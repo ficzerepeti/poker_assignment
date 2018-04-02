@@ -1,15 +1,16 @@
 #pragma once
 
-#include "i_equity_calculator.h"
+#include "i_poker_eval.h"
 
 namespace poker_lib {
 
-class equity_calculator : public i_equity_calculator
+class poker_eval : public i_poker_eval
 {
 public:
-    ~equity_calculator() override = default;
+    ~poker_eval() override = default;
 
     std::vector<double> calculate_equities(const std::vector<std::string> &hands, const std::string &board) override;
+    double calculate_pot_percentage(uint64_t pot, uint64_t raise) override;
 };
 
 } // end of namespace poker_lib
