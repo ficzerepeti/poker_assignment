@@ -9,9 +9,14 @@ int main()
 {
     poker_lib::poker_eval eq;
 
-    const auto result = eq.calculate_equities({ "6d 6c", "random", "random", "random", "random", "random"}, "Kc 6h 2h");
-
-    std::cout << "First player has " << (result.at(0) * 100) << "% chance to win" << std::endl;
+    {
+        const auto result = eq.calculate_equities({ "6d 6c", "random", "random", "random", "random", "random"}, "Kc 6h 2h");
+        std::cout << "First player has " << (result.at(0) * 100) << "% chance to win" << std::endl;
+    }
+    {
+        const auto result = eq.calculate_equities({ "Ad Ac", "random", "random", "random", "random", "random"}, "");
+        std::cout << "First player has " << (result.at(0) * 100) << "% chance to win" << std::endl;
+    }
 
     const uint64_t pot_size = 1000;
     const uint64_t raise = 500;
