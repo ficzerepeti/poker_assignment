@@ -3,18 +3,26 @@
 #include <omp/CardRange.h>
 #include <omp/EquityCalculator.h>
 
-#include "poker_eval.h"
+#include "my_poker_lib.h"
 
 int main()
 {
-    poker_lib::poker_eval eq;
+    poker_lib::my_poker_lib eq;
 
     {
         const auto result = eq.calculate_equities({ "6d 6c", "random", "random", "random", "random", "random"}, "Kc 6h 2h");
         std::cout << "First player has " << (result.at(0) * 100) << "% chance to win" << std::endl;
     }
     {
-        const auto result = eq.calculate_equities({ "Ad Ac", "random", "random", "random", "random", "random"}, "");
+        const auto result = eq.calculate_equities({ "Ad Ac", "random", "random", "random"}, "");
+        std::cout << "First player has " << (result.at(0) * 100) << "% chance to win" << std::endl;
+    }
+    {
+        const auto result = eq.calculate_equities({ "Qd Jc", "random", "random", "random"}, "");
+        std::cout << "First player has " << (result.at(0) * 100) << "% chance to win" << std::endl;
+    }
+    {
+        const auto result = eq.calculate_equities({ "6d 6c", "random", "random", "random"}, "");
         std::cout << "First player has " << (result.at(0) * 100) << "% chance to win" << std::endl;
     }
 
