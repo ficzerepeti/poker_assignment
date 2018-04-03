@@ -5,14 +5,6 @@
 
 namespace poker_lib {
 
-enum class phase
-{
-    pre_flop,
-    flop,
-    turn,
-    river
-};
-
 class i_my_poker_lib
 {
 public:

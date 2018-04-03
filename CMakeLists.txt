@@ -6,10 +6,15 @@ add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/../OMPEval" "${CMAKE_CURRENT_BINARY_
 set(CMAKE_CXX_STANDARD 17)
 
 set(POKER_HEADERS
+    ${CMAKE_CURRENT_LIST_DIR}/i_my_poker_lib.h
+    ${CMAKE_CURRENT_LIST_DIR}/i_user_interaction.h
     ${CMAKE_CURRENT_LIST_DIR}/my_poker_lib.h
-    ${CMAKE_CURRENT_LIST_DIR}/i_my_poker_lib.h)
+    ${CMAKE_CURRENT_LIST_DIR}/texas_holdem_game.h
+    ${CMAKE_CURRENT_LIST_DIR}/user_interaction.h)
 set(POKER_SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/my_poker_lib.cpp)
+    ${CMAKE_CURRENT_LIST_DIR}/my_poker_lib.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/texas_holdem_game.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/user_interaction.cpp)
 
 add_library(my_poker_lib STATIC ${POKER_HEADERS} ${POKER_SOURCES})
 target_link_libraries(my_poker_lib libOMPEval)
