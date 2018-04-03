@@ -12,13 +12,15 @@ set(POKER_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/i_my_poker_lib.h
     ${CMAKE_CURRENT_LIST_DIR}/i_user_interaction.h
     ${CMAKE_CURRENT_LIST_DIR}/my_poker_lib.h
-    ${CMAKE_CURRENT_LIST_DIR}/texas_holdem_game.h
-    ${CMAKE_CURRENT_LIST_DIR}/user_interaction.h)
+    ${CMAKE_CURRENT_LIST_DIR}/player_actions.h
+    ${CMAKE_CURRENT_LIST_DIR}/streamed_user_interaction.h
+    ${CMAKE_CURRENT_LIST_DIR}/texas_holdem_game.h )
 set(POKER_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/deck_interaction.cpp
     ${CMAKE_CURRENT_LIST_DIR}/my_poker_lib.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/texas_holdem_game.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/user_interaction.cpp)
+    ${CMAKE_CURRENT_LIST_DIR}/player_actions.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/streamed_user_interaction.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/texas_holdem_game.cpp)
 
 add_library(my_poker_lib STATIC ${POKER_HEADERS} ${POKER_SOURCES})
 target_link_libraries(my_poker_lib libOMPEval)

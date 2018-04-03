@@ -87,7 +87,7 @@ bool texas_holdem_game::run_betting_round()
 
         if (player.is_our_user)
         {
-            const auto recommended_action = user_action_check{}; // TODO
+            const auto recommended_action = player_action_check{}; // TODO
             player.actions_taken.emplace_back(_user_interaction.get_user_action(curr_player_pos, recommended_action));
         }
         else
@@ -96,18 +96,18 @@ bool texas_holdem_game::run_betting_round()
         }
 
         std::visit(overloaded {
-            [&](user_action_fold arg) {
+            [&](player_action_fold arg) {
                 if (checks_or_folds_needed > 0) { --checks_or_folds_needed; }
                 --num_of_active_players;
             },
-            [&](user_action_check arg) {
+            [&](player_action_check arg) {
                 if (checks_or_folds_needed > 0) { --checks_or_folds_needed; }
             },
-            [&](const user_action_call &arg) {
+            [&](const player_action_call &arg) {
                 if (checks_or_folds_needed > 0) { --checks_or_folds_needed; }
                 _pot_size += arg.amount;
             },
-            [&](const user_action_raise& arg) {
+            [&](const player_action_raise& arg) {
                 _pot_size += arg.amount;
                 checks_or_folds_needed = num_of_active_players - 1;
             }

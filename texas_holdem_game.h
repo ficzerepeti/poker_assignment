@@ -23,13 +23,13 @@ public:
 private:
     struct player_state
     {
-        std::vector<i_user_interaction::user_action_t> actions_taken;
+        std::vector<i_user_interaction::player_action_t> actions_taken;
         size_t user_stack = 0;
         bool is_our_user = false;
 
         bool has_folded() const
         {
-            return !actions_taken.empty() && std::holds_alternative<user_action_fold>(actions_taken.back());
+            return !actions_taken.empty() && std::holds_alternative<player_action_fold>(actions_taken.back());
         }
     };
 
