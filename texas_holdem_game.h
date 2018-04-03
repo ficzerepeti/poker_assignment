@@ -11,7 +11,7 @@ namespace poker_lib {
 class texas_holdem_game
 {
 public:
-    texas_holdem_game(i_user_interaction &user_interaction,
+    texas_holdem_game(i_user_interaction& user_interaction,
                       i_deck_interaction& deck_interaction,
                       size_t user_stack,
                       size_t big_blind_size,

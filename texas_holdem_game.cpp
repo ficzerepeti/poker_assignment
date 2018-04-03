@@ -15,7 +15,7 @@ template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
 namespace poker_lib {
 
-texas_holdem_game::texas_holdem_game(i_user_interaction &user_interaction,
+texas_holdem_game::texas_holdem_game(i_user_interaction& user_interaction,
                                      i_deck_interaction& deck_interaction,
                                      const size_t user_stack,
                                      const size_t big_blind_size,

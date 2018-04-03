@@ -26,5 +26,8 @@ add_library(my_poker_lib STATIC ${POKER_HEADERS} ${POKER_SOURCES})
 target_link_libraries(my_poker_lib libOMPEval)
 target_include_directories(my_poker_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-add_executable(poker_assignment main.cpp my_poker_lib.cpp)
+add_executable(poker_assignment ${CMAKE_CURRENT_LIST_DIR}/main.cpp)
 target_link_libraries(poker_assignment my_poker_lib)
+
+add_executable(texas_holdem_game ${CMAKE_CURRENT_LIST_DIR}/main_holdem_game.cpp)
+target_link_libraries(texas_holdem_game my_poker_lib)
