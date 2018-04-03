@@ -33,9 +33,11 @@ private:
         }
     };
 
+    // Returns true if game ended. False otherwise
     bool run_betting_round();
 
-    void execute_showdown() {}
+    void execute_showdown();
+    size_t get_active_player_count() const;
 
     i_user_interaction& _user_interaction;
     i_deck_interaction& _deck_interaction;

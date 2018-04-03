@@ -16,6 +16,8 @@ public:
     player_action_t get_user_action(size_t position, const player_action_t &recommended_action) override;
     player_action_t get_opponent_action(size_t position) override;
 
+    void notify_player(const std::string &message) override;
+
 private:
     player_action_t read_player_action();
 

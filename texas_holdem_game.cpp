@@ -1,5 +1,7 @@
+#include <algorithm>
 #include <stdexcept>
 #include <sstream>
+
 #include "texas_holdem_game.h"
 
 // Helper to be able to visit with lambdas without if constexpr.
@@ -45,38 +47,60 @@ void texas_holdem_game::run_game()
     _pot_size = _big_blind_size + _big_blind_size / 2;
 
     _pocket_cards = _deck_interaction.get_pocket_cards();
-    run_betting_round();
+    bool game_has_ended = run_betting_round();
 
     // Flop
-    _board = _deck_interaction.get_flop();
-    run_betting_round();
+    if (!game_has_ended)
+    {
+        _board = _deck_interaction.get_flop();
+        game_has_ended = run_betting_round();
+    }
 
     // Turn
-    _board += _deck_interaction.get_turn();
-    run_betting_round();
+    if (!game_has_ended)
+    {
+        _board += _deck_interaction.get_turn();
+        game_has_ended = run_betting_round();
+    }
 
-    // Turn
-    _board += _deck_interaction.get_river();
-    run_betting_round();
+    // River
+    if (!game_has_ended)
+    {
+        _board += _deck_interaction.get_river();
+        game_has_ended = run_betting_round();
+    }
 
-    execute_showdown();
+    if (game_has_ended)
+    {
+        const auto iter = std::find_if(_players.begin(), _players.end(), [](const player_state& state){ return !state.has_folded(); });
+        const auto winner_pos = static_cast<size_t>(std::distance(_players.begin(), iter));
+
+        std::ostringstream oss;
+
+        if (winner_pos >= _players.size())
+        {
+            oss << "Calculated winner position " << winner_pos << " is not valid as there are " << _players.size() << " players";
+            throw std::logic_error(oss.str());
+        }
+
+        oss << "Player in pos " << winner_pos << " won the game as everyone else folded.";
+
+        _user_interaction.notify_player(oss.str());
+    }
+    else
+    {
+        execute_showdown();
+    }
 
 }
 
 bool texas_holdem_game::run_betting_round()
 {
-    auto num_of_active_players = _players.size();
-    for (const auto& player : _players)
-    {
-        if (player.has_folded())
-        {
-            --num_of_active_players;
-        }
-    }
-    auto checks_or_folds_needed = num_of_active_players;
+    auto active_player_count = get_active_player_count();
+    auto checks_or_folds_needed = active_player_count;
 
     for (auto curr_player_pos = 2 % _players.size();
-         num_of_active_players > 1 && checks_or_folds_needed > 0;
+         active_player_count > 1 && checks_or_folds_needed > 0;
          curr_player_pos = (curr_player_pos + 1) % _players.size())
     {
         auto& player = _players.at(curr_player_pos);
@@ -98,7 +122,7 @@ bool texas_holdem_game::run_betting_round()
         std::visit(overloaded {
             [&](player_action_fold arg) {
                 if (checks_or_folds_needed > 0) { --checks_or_folds_needed; }
-                --num_of_active_players;
+                --active_player_count;
             },
             [&](player_action_check arg) {
                 if (checks_or_folds_needed > 0) { --checks_or_folds_needed; }
@@ -109,12 +133,25 @@ bool texas_holdem_game::run_betting_round()
             },
             [&](const player_action_raise& arg) {
                 _pot_size += arg.amount;
-                checks_or_folds_needed = num_of_active_players - 1;
+                checks_or_folds_needed = active_player_count - 1;
             }
         }, player.actions_taken.back());
     }
 
-    return false;
+    return get_active_player_count() < 2;
+}
+
+void texas_holdem_game::execute_showdown()
+{
+    // TODO
+    _user_interaction.notify_player("Not yet implemented");
+}
+
+size_t texas_holdem_game::get_active_player_count() const
+{
+    return static_cast<size_t>(std::count_if(_players.begin(),
+                                             _players.end(),
+                                             [](const player_state& state){ return !state.has_folded(); }));
 }
 
 } // end of namespace poker_lib

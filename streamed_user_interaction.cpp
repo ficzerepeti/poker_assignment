@@ -88,4 +88,9 @@ i_user_interaction::player_action_t streamed_user_interaction::read_player_actio
     throw std::logic_error("Reached unreachable code in get_user_action");
 }
 
+void streamed_user_interaction::notify_player(const std::string &message)
+{
+    _os << message << std::endl;
+}
+
 } // end of namespace poker_lib
