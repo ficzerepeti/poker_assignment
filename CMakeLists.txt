@@ -4,7 +4,7 @@ project(poker_assignment)
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/../OMPEval" "${CMAKE_CURRENT_BINARY_DIR}/OMPEval")
 
 set(CMAKE_CXX_STANDARD 17)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -Werror")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -Werror")
 
 set(POKER_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/deck_interaction.h
@@ -14,7 +14,7 @@ set(POKER_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/my_poker_lib.h
     ${CMAKE_CURRENT_LIST_DIR}/player_actions.h
     ${CMAKE_CURRENT_LIST_DIR}/streamed_user_interaction.h
-    ${CMAKE_CURRENT_LIST_DIR}/texas_holdem_game.h )
+    ${CMAKE_CURRENT_LIST_DIR}/texas_holdem_game.h)
 set(POKER_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/deck_interaction.cpp
     ${CMAKE_CURRENT_LIST_DIR}/my_poker_lib.cpp

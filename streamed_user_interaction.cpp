@@ -36,18 +36,20 @@ streamed_user_interaction::player_action_t streamed_user_interaction::get_user_a
 {
     _os << "Your recommended action is ";
     std::visit([&](const auto &obj){ _os << obj; }, recommended_action);
-    _os << ". Please specify your action (fold, check, call, raise <value>" << std::endl;
+    _os << std::endl;
 
     return read_player_action();
 }
 
 streamed_user_interaction::player_action_t streamed_user_interaction::get_opponent_action(size_t position)
 {
+    _os << "What did user at position " << position << " do?" << std::endl;
     return read_player_action();
 }
 
 i_user_interaction::player_action_t streamed_user_interaction::read_player_action()
 {
+    _os << "Please specify an action: fold, check, call, raise <value>" << std::endl;
     auto type = player_action_type::unknown;
     bool first_read = true;
     while (type == player_action_type::unknown)
@@ -68,18 +70,10 @@ i_user_interaction::player_action_t streamed_user_interaction::read_player_actio
         return player_action_check{};
 
     case player_action_type::call:
-    {
-        uint64_t amount = 0;
-        _is >> amount;
-        return player_action_call{amount};
-    }
+        return player_action_call{read_amount()};
 
     case player_action_type::raise:
-    {
-        uint64_t amount = 0;
-        _is >> amount;
-        return player_action_raise{amount};
-    }
+        return player_action_raise{read_amount()};
 
     case player_action_type::unknown:
         break;
@@ -91,6 +85,25 @@ i_user_interaction::player_action_t streamed_user_interaction::read_player_actio
 void streamed_user_interaction::notify_player(const std::string &message)
 {
     _os << message << std::endl;
+}
+
+uint64_t streamed_user_interaction::read_amount()
+{
+    _os << "Please specify the amount" << std::endl;
+    std::string str;
+
+    while (true)
+    {
+        try
+        {
+            _is >> str;
+            return std::stoull(str);
+        }
+        catch (const std::exception& e)
+        {
+            _os << "Please enter a number, no other characters" << std::endl;
+        }
+    }
 }
 
 } // end of namespace poker_lib

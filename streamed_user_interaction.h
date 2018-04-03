@@ -20,6 +20,7 @@ public:
 
 private:
     player_action_t read_player_action();
+    uint64_t read_amount();
 
     std::ostream& _os;
     std::istream& _is;
