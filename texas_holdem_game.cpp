@@ -41,12 +41,22 @@ void texas_holdem_game::run_game()
     _pot_size = _big_blind_size + _big_blind_size / 2;
 
     _pocket_cards = _deck_interaction.get_pocket_cards();
+    {
+        std::ostringstream oss;
+        oss << "Pre-flop: Pot size is " << _pot_size << ", pocket cards: " << _pocket_cards;
+        _user_interaction.notify_player(oss.str());
+    }
     bool game_has_ended = run_betting_round();
 
     // Flop
     if (!game_has_ended)
     {
         _board = _deck_interaction.get_flop();
+        {
+            std::ostringstream oss;
+            oss << "Flop: Pot size is " << _pot_size << ", pocket cards: " << _pocket_cards << ", board: " << _board;
+            _user_interaction.notify_player(oss.str());
+        }
         game_has_ended = run_betting_round();
     }
 
@@ -54,6 +64,11 @@ void texas_holdem_game::run_game()
     if (!game_has_ended)
     {
         _board += _deck_interaction.get_turn();
+        {
+            std::ostringstream oss;
+            oss << "Turn: Pot size is " << _pot_size << ", pocket cards: " << _pocket_cards << ", board: " << _board;
+            _user_interaction.notify_player(oss.str());
+        }
         game_has_ended = run_betting_round();
     }
 
@@ -61,6 +76,11 @@ void texas_holdem_game::run_game()
     if (!game_has_ended)
     {
         _board += _deck_interaction.get_river();
+        {
+            std::ostringstream oss;
+            oss << "River: Pot size is " << _pot_size << ", pocket cards: " << _pocket_cards << ", board: " << _board;
+            _user_interaction.notify_player(oss.str());
+        }
         game_has_ended = run_betting_round();
     }
 
@@ -86,6 +106,8 @@ void texas_holdem_game::run_game()
         execute_showdown();
     }
 
+    // Move the dealer button around
+    std::rotate(_players.begin(), std::next(_players.begin()), _players.end());
 }
 
 bool texas_holdem_game::run_betting_round()
