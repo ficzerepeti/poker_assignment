@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(POKER_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/i_my_poker_lib.h
+    ${CMAKE_CURRENT_LIST_DIR}/i_texas_holdem_game_state.h
     ${CMAKE_CURRENT_LIST_DIR}/i_user_interaction.h
     ${CMAKE_CURRENT_LIST_DIR}/my_poker_lib.h
     ${CMAKE_CURRENT_LIST_DIR}/player_actions.h

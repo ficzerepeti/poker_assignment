@@ -52,7 +52,7 @@ std::string streamed_user_interaction::get_river()
     return "5h";
 }
 
-streamed_user_interaction::player_action_t streamed_user_interaction::get_user_action(size_t position,
+player_action_t streamed_user_interaction::get_user_action(size_t position,
                                                                                       const player_action_t &recommended_action)
 {
     _os << "Your recommended action is ";
@@ -62,13 +62,13 @@ streamed_user_interaction::player_action_t streamed_user_interaction::get_user_a
     return read_player_action();
 }
 
-streamed_user_interaction::player_action_t streamed_user_interaction::get_opponent_action(size_t position)
+player_action_t streamed_user_interaction::get_opponent_action(size_t position)
 {
     _os << "What did user at position " << position << " do?" << std::endl;
     return read_player_action();
 }
 
-i_user_interaction::player_action_t streamed_user_interaction::read_player_action()
+player_action_t streamed_user_interaction::read_player_action()
 {
     _os << "Please specify an action: fold, check, call, raise <value>" << std::endl;
     auto type = player_action_type::unknown;

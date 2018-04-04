@@ -9,13 +9,15 @@ template<class T> struct always_false : std::false_type {};
 
 namespace poker_lib {
 
-texas_holdem_game::texas_holdem_game(i_user_interaction& user_interaction,
+texas_holdem_game::texas_holdem_game(i_user_interaction &user_interaction,
+                                     i_my_poker_lib &poker_lib,
                                      const size_t user_stack,
                                      const size_t big_blind_size,
                                      const size_t num_of_players,
                                      const size_t user_pos)
 :
     _user_interaction(user_interaction),
+    _poker_lib(poker_lib),
     _big_blind_size(big_blind_size),
     _players(num_of_players)
 {
@@ -131,12 +133,17 @@ bool texas_holdem_game::run_betting_round()
         if (player.is_our_user)
         {
             const auto recommended_action = player_action_check_or_call{}; // TODO
+
+            std::ostringstream oss;
             if (needs_to_invest)
             {
-                std::ostringstream oss;
-                oss << "It's your turn and you need to invest " << amount_needed_to_call << " to call";
-                _user_interaction.notify_player(oss.str());
+                oss << "It's your turn and you need to invest " << amount_needed_to_call << " to call. ";
             }
+            const auto user_equity = calculate_user_equity();
+
+            oss << "Your equity of winning is " << (user_equity * 100) << '%' << std::endl;
+            _user_interaction.notify_player(oss.str());
+
             player.actions_taken.emplace_back(_user_interaction.get_user_action(curr_player_pos, recommended_action));
         }
         else
@@ -187,6 +194,13 @@ size_t texas_holdem_game::get_active_player_count() const
     return static_cast<size_t>(std::count_if(_players.begin(),
                                              _players.end(),
                                              [](const player_state& state){ return !state.has_folded(); }));
+}
+
+double texas_holdem_game::calculate_user_equity() const
+{
+    std::vector<std::string> hands(get_active_player_count(), "random");
+    hands.front() = _pocket_cards;
+    return _poker_lib.calculate_equities(hands, _board).front();
 }
 
 } // end of namespace poker_lib

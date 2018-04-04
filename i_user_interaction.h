@@ -8,8 +8,6 @@ namespace poker_lib {
 class i_user_interaction
 {
 public:
-    using player_action_t = std::variant<player_action_fold, player_action_check_or_call, player_action_raise>;
-
     virtual ~i_user_interaction() = default;
 
     virtual std::string get_pocket_cards() = 0;

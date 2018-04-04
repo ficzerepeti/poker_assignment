@@ -4,17 +4,19 @@
 #include <vector>
 
 #include "i_user_interaction.h"
+#include "i_my_poker_lib.h"
 
 namespace poker_lib {
 
 class texas_holdem_game
 {
 public:
-    texas_holdem_game(i_user_interaction& user_interaction,
-                      size_t user_stack,
-                      size_t big_blind_size,
-                      size_t num_of_players,
-                      size_t user_pos);
+    texas_holdem_game(i_user_interaction &user_interaction,
+                          i_my_poker_lib &poker_lib,
+                          const size_t user_stack,
+                          const size_t big_blind_size,
+                          const size_t num_of_players,
+                          const size_t user_pos);
 
     void run_game();
 
@@ -23,7 +25,7 @@ private:
     {
         uint64_t stack = 0;
 
-        std::vector<i_user_interaction::player_action_t> actions_taken;
+        std::vector<player_action_t> actions_taken;
         uint64_t investment_in_pot = 0;
         bool is_our_user = false;
         bool is_all_in = false;
@@ -40,7 +42,10 @@ private:
     void execute_showdown();
     size_t get_active_player_count() const;
 
+    double calculate_user_equity() const;
+
     i_user_interaction& _user_interaction;
+    i_my_poker_lib& _poker_lib;
 
     // per_game_state
     uint64_t _big_blind_size = 0;
