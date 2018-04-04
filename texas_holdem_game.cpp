@@ -30,13 +30,16 @@ texas_holdem_game::texas_holdem_game(i_user_interaction& user_interaction,
         throw std::invalid_argument(oss.str());
     }
     _players[user_pos].is_our_user = true;
-    _players[user_pos].user_stack = user_stack;
+    _players[user_pos].stack = user_stack;
 }
 
 void texas_holdem_game::run_game()
 {
     // Pre-flop
+    _players.at(0).investment_in_pot = _big_blind_size / 2;
+    _players.at(1).investment_in_pot = _big_blind_size;
     _pot_size = _big_blind_size + _big_blind_size / 2;
+    _max_investment = _big_blind_size;
 
     _pocket_cards = _user_interaction.get_pocket_cards();
     {
@@ -117,14 +120,23 @@ bool texas_holdem_game::run_betting_round()
          curr_player_pos = (curr_player_pos + 1) % _players.size())
     {
         auto& player = _players.at(curr_player_pos);
-        if (player.has_folded())
+        if (player.has_folded() || player.is_all_in)
         {
             continue;
         }
 
+        const bool needs_to_invest = player.investment_in_pot < _max_investment;
+        const auto amount_needed_to_call = needs_to_invest ? (_max_investment - player.investment_in_pot) : 0;
+
         if (player.is_our_user)
         {
-            const auto recommended_action = player_action_check{}; // TODO
+            const auto recommended_action = player_action_check_or_call{}; // TODO
+            if (needs_to_invest)
+            {
+                std::ostringstream oss;
+                oss << "It's your turn and you need to invest " << amount_needed_to_call << " to call";
+                _user_interaction.notify_player(oss.str());
+            }
             player.actions_taken.emplace_back(_user_interaction.get_user_action(curr_player_pos, recommended_action));
         }
         else
@@ -132,24 +144,33 @@ bool texas_holdem_game::run_betting_round()
             player.actions_taken.emplace_back(_user_interaction.get_opponent_action(curr_player_pos));
         }
 
-        auto visitor = [&](const auto& arg)
+        auto act_on_action = [&](const auto& arg)
         {
             using T = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<T, player_action_fold>) { --checks_or_folds_needed; }
-            else if constexpr (std::is_same_v<T, player_action_check>) { --checks_or_folds_needed; }
-            else if constexpr (std::is_same_v<T, player_action_call>)
+            if constexpr (std::is_same_v<T, player_action_fold>)
             {
                 --checks_or_folds_needed;
-                _pot_size += arg.amount;
+            }
+            else if constexpr (std::is_same_v<T, player_action_check_or_call>)
+            {
+                --checks_or_folds_needed;
+                player.investment_in_pot += amount_needed_to_call;
+                _pot_size += amount_needed_to_call;
             }
             else if constexpr (std::is_same_v<T, player_action_raise>)
             {
-                _pot_size += arg.amount;
-                checks_or_folds_needed = get_active_player_count() - 1;
+                checks_or_folds_needed = get_active_player_count() - 1; // Players need to react to this raise
+
+                const auto investment = amount_needed_to_call + arg.amount_raised_above_call;
+                player.investment_in_pot += investment;
+                _pot_size += investment;
             }
-            else { static_assert(always_false<T>::value, "non-exhaustive visitor!"); }
+            else
+            {
+                static_assert(always_false<T>::value, "non-exhaustive visitor!");
+            }
         };
-        std::visit(visitor, player.actions_taken.back());
+        std::visit(act_on_action, player.actions_taken.back());
     }
 
     return get_active_player_count() < 2;

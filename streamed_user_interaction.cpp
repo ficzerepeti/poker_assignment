@@ -53,7 +53,7 @@ std::string streamed_user_interaction::get_river()
 }
 
 streamed_user_interaction::player_action_t streamed_user_interaction::get_user_action(size_t position,
-                                                                                    const player_action_t &recommended_action)
+                                                                                      const player_action_t &recommended_action)
 {
     _os << "Your recommended action is ";
     std::visit([&](const auto &obj){ _os << obj; }, recommended_action);
@@ -77,7 +77,7 @@ i_user_interaction::player_action_t streamed_user_interaction::read_player_actio
     {
         if (!first_read)
         {
-            _os << "Invalid input. Please specify either fold, check, call or raise <value>" << std::endl;
+            _os << "Invalid input. Please specify either fold, check, call or raise" << std::endl;
         }
         first_read = false;
         _is >> type;
@@ -88,10 +88,8 @@ i_user_interaction::player_action_t streamed_user_interaction::read_player_actio
         return player_action_fold{};
 
     case player_action_type::check:
-        return player_action_check{};
-
     case player_action_type::call:
-        return player_action_call{read_amount()};
+        return player_action_check_or_call{};
 
     case player_action_type::raise:
         return player_action_raise{read_amount()};
