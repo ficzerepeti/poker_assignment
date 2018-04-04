@@ -43,10 +43,10 @@ private:
     i_deck_interaction& _deck_interaction;
 
     // per_game_state
-    size_t _big_blind_size = 0;
+    uint64_t _big_blind_size = 0;
     std::vector<player_state> _players;
 
-    size_t _pot_size = 0;
+    uint64_t _pot_size = 0;
     std::string _pocket_cards;
     std::string _board;
 };

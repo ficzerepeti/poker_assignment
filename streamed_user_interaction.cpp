@@ -1,3 +1,4 @@
+#include <string>
 #include "streamed_user_interaction.h"
 
 enum class player_action_type
@@ -99,7 +100,7 @@ uint64_t streamed_user_interaction::read_amount()
             _is >> str;
             return std::stoull(str);
         }
-        catch (const std::exception& e)
+        catch (const std::exception&)
         {
             _os << "Please enter a number, no other characters" << std::endl;
         }

@@ -1,17 +1,11 @@
 #include <algorithm>
 #include <stdexcept>
 #include <sstream>
+#include <type_traits>
 
 #include "texas_holdem_game.h"
 
-// Helper to be able to visit with lambdas without if constexpr.
-template<class... Ts>
-struct overloaded : Ts...
-{
-    using Ts::operator()...;
-};
-// Type deduction guide
-template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+template<class T> struct always_false : std::false_type {};
 
 namespace poker_lib {
 
@@ -96,11 +90,10 @@ void texas_holdem_game::run_game()
 
 bool texas_holdem_game::run_betting_round()
 {
-    auto active_player_count = get_active_player_count();
-    auto checks_or_folds_needed = active_player_count;
+    auto checks_or_folds_needed = get_active_player_count();
 
     for (auto curr_player_pos = 2 % _players.size();
-         active_player_count > 1 && checks_or_folds_needed > 0;
+         (get_active_player_count() > 1) && (checks_or_folds_needed > 0);
          curr_player_pos = (curr_player_pos + 1) % _players.size())
     {
         auto& player = _players.at(curr_player_pos);
@@ -119,23 +112,24 @@ bool texas_holdem_game::run_betting_round()
             player.actions_taken.emplace_back(_user_interaction.get_opponent_action(curr_player_pos));
         }
 
-        std::visit(overloaded {
-            [&](player_action_fold arg) {
-                if (checks_or_folds_needed > 0) { --checks_or_folds_needed; }
-                --active_player_count;
-            },
-            [&](player_action_check arg) {
-                if (checks_or_folds_needed > 0) { --checks_or_folds_needed; }
-            },
-            [&](const player_action_call &arg) {
-                if (checks_or_folds_needed > 0) { --checks_or_folds_needed; }
+        auto visitor = [&](const auto& arg)
+        {
+            using T = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<T, player_action_fold>) { --checks_or_folds_needed; }
+            else if constexpr (std::is_same_v<T, player_action_check>) { --checks_or_folds_needed; }
+            else if constexpr (std::is_same_v<T, player_action_call>)
+            {
+                --checks_or_folds_needed;
                 _pot_size += arg.amount;
-            },
-            [&](const player_action_raise& arg) {
-                _pot_size += arg.amount;
-                checks_or_folds_needed = active_player_count - 1;
             }
-        }, player.actions_taken.back());
+            else if constexpr (std::is_same_v<T, player_action_raise>)
+            {
+                _pot_size += arg.amount;
+                checks_or_folds_needed = get_active_player_count() - 1;
+            }
+            else { static_assert(always_false<T>::value, "non-exhaustive visitor!"); }
+        };
+        std::visit(visitor, player.actions_taken.back());
     }
 
     return get_active_player_count() < 2;

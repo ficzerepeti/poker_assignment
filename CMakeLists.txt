@@ -4,9 +4,6 @@ project(poker_assignment)
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/../OMPEval" "${CMAKE_CURRENT_BINARY_DIR}/OMPEval")
 
 set(CMAKE_CXX_STANDARD 17)
-if (NOT MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -Werror")
-endif()
 
 set(POKER_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/deck_interaction.h
@@ -33,3 +30,7 @@ target_link_libraries(poker_assignment my_poker_lib)
 
 add_executable(texas_holdem_game ${CMAKE_CURRENT_LIST_DIR}/main_holdem_game.cpp)
 target_link_libraries(texas_holdem_game my_poker_lib)
+
+if (NOT MSVC)
+    target_compile_options(my_poker_lib PUBLIC "-Wall -Wextra -Wno-unused-parameter -Werror")
+endif()
