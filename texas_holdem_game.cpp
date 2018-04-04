@@ -10,14 +10,12 @@ template<class T> struct always_false : std::false_type {};
 namespace poker_lib {
 
 texas_holdem_game::texas_holdem_game(i_user_interaction& user_interaction,
-                                     i_deck_interaction& deck_interaction,
                                      const size_t user_stack,
                                      const size_t big_blind_size,
                                      const size_t num_of_players,
                                      const size_t user_pos)
 :
     _user_interaction(user_interaction),
-    _deck_interaction(deck_interaction),
     _big_blind_size(big_blind_size),
     _players(num_of_players)
 {
@@ -40,7 +38,7 @@ void texas_holdem_game::run_game()
     // Pre-flop
     _pot_size = _big_blind_size + _big_blind_size / 2;
 
-    _pocket_cards = _deck_interaction.get_pocket_cards();
+    _pocket_cards = _user_interaction.get_pocket_cards();
     {
         std::ostringstream oss;
         oss << "Pre-flop: Pot size is " << _pot_size << ", pocket cards: " << _pocket_cards;
@@ -51,7 +49,7 @@ void texas_holdem_game::run_game()
     // Flop
     if (!game_has_ended)
     {
-        _board = _deck_interaction.get_flop();
+        _board = _user_interaction.get_flop();
         {
             std::ostringstream oss;
             oss << "Flop: Pot size is " << _pot_size << ", pocket cards: " << _pocket_cards << ", board: " << _board;
@@ -63,7 +61,7 @@ void texas_holdem_game::run_game()
     // Turn
     if (!game_has_ended)
     {
-        _board += _deck_interaction.get_turn();
+        _board += _user_interaction.get_turn();
         {
             std::ostringstream oss;
             oss << "Turn: Pot size is " << _pot_size << ", pocket cards: " << _pocket_cards << ", board: " << _board;
@@ -75,7 +73,7 @@ void texas_holdem_game::run_game()
     // River
     if (!game_has_ended)
     {
-        _board += _deck_interaction.get_river();
+        _board += _user_interaction.get_river();
         {
             std::ostringstream oss;
             oss << "River: Pot size is " << _pot_size << ", pocket cards: " << _pocket_cards << ", board: " << _board;

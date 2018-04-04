@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "i_user_interaction.h"
-#include "i_deck_interaction.h"
 
 namespace poker_lib {
 
@@ -12,7 +11,6 @@ class texas_holdem_game
 {
 public:
     texas_holdem_game(i_user_interaction& user_interaction,
-                      i_deck_interaction& deck_interaction,
                       size_t user_stack,
                       size_t big_blind_size,
                       size_t num_of_players,
@@ -40,7 +38,6 @@ private:
     size_t get_active_player_count() const;
 
     i_user_interaction& _user_interaction;
-    i_deck_interaction& _deck_interaction;
 
     // per_game_state
     uint64_t _big_blind_size = 0;

@@ -32,6 +32,26 @@ streamed_user_interaction::streamed_user_interaction(std::ostream &os, std::istr
 {
 }
 
+std::string streamed_user_interaction::get_pocket_cards()
+{
+    return "Ac Ad";
+}
+
+std::string streamed_user_interaction::get_flop()
+{
+    return "Ah As 3c";
+}
+
+std::string streamed_user_interaction::get_turn()
+{
+    return "4d";
+}
+
+std::string streamed_user_interaction::get_river()
+{
+    return "5h";
+}
+
 streamed_user_interaction::player_action_t streamed_user_interaction::get_user_action(size_t position,
                                                                                     const player_action_t &recommended_action)
 {

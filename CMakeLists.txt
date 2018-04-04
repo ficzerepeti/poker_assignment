@@ -6,8 +6,6 @@ add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/../OMPEval" "${CMAKE_CURRENT_BINARY_
 set(CMAKE_CXX_STANDARD 17)
 
 set(POKER_HEADERS
-    ${CMAKE_CURRENT_LIST_DIR}/deck_interaction.h
-    ${CMAKE_CURRENT_LIST_DIR}/i_deck_interaction.h
     ${CMAKE_CURRENT_LIST_DIR}/i_my_poker_lib.h
     ${CMAKE_CURRENT_LIST_DIR}/i_user_interaction.h
     ${CMAKE_CURRENT_LIST_DIR}/my_poker_lib.h
@@ -15,7 +13,6 @@ set(POKER_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/streamed_user_interaction.h
     ${CMAKE_CURRENT_LIST_DIR}/texas_holdem_game.h)
 set(POKER_SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/deck_interaction.cpp
     ${CMAKE_CURRENT_LIST_DIR}/my_poker_lib.cpp
     ${CMAKE_CURRENT_LIST_DIR}/player_actions.cpp
     ${CMAKE_CURRENT_LIST_DIR}/streamed_user_interaction.cpp
