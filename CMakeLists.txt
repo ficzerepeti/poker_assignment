@@ -6,26 +6,22 @@ add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/../OMPEval" "${CMAKE_CURRENT_BINARY_
 set(CMAKE_CXX_STANDARD 17)
 
 set(POKER_HEADERS
-    ${CMAKE_CURRENT_LIST_DIR}/analysis_engine.h
-    ${CMAKE_CURRENT_LIST_DIR}/analysis_engine_factory.h
-    ${CMAKE_CURRENT_LIST_DIR}/game_engine.h
-    ${CMAKE_CURRENT_LIST_DIR}/i_analysis_engine.h
-    ${CMAKE_CURRENT_LIST_DIR}/i_analysis_engine_factory.h
+    ${CMAKE_CURRENT_LIST_DIR}/game_stages.h
     ${CMAKE_CURRENT_LIST_DIR}/i_my_poker_lib.h
-    ${CMAKE_CURRENT_LIST_DIR}/i_game_engine.h
+    ${CMAKE_CURRENT_LIST_DIR}/i_table_state_manager.h
     ${CMAKE_CURRENT_LIST_DIR}/i_user_interaction.h
     ${CMAKE_CURRENT_LIST_DIR}/my_poker_lib.h
     ${CMAKE_CURRENT_LIST_DIR}/player_actions.h
     ${CMAKE_CURRENT_LIST_DIR}/streamed_user_interaction.h
-    ${CMAKE_CURRENT_LIST_DIR}/texas_holdem_game.h)
+    ${CMAKE_CURRENT_LIST_DIR}/table_state_manager.h
+    ${CMAKE_CURRENT_LIST_DIR}/texas_holdem_game_orchestrator.h)
 set(POKER_SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/analysis_engine.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/analysis_engine_factory.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/game_engine.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/game_stages.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/table_state_manager.cpp
     ${CMAKE_CURRENT_LIST_DIR}/my_poker_lib.cpp
     ${CMAKE_CURRENT_LIST_DIR}/player_actions.cpp
     ${CMAKE_CURRENT_LIST_DIR}/streamed_user_interaction.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/texas_holdem_game.cpp)
+    ${CMAKE_CURRENT_LIST_DIR}/texas_holdem_game_orchestrator.cpp)
 
 add_library(my_poker_lib STATIC ${POKER_HEADERS} ${POKER_SOURCES})
 target_link_libraries(my_poker_lib libOMPEval)
@@ -38,5 +34,8 @@ add_executable(texas_holdem_game ${CMAKE_CURRENT_LIST_DIR}/main_holdem_game.cpp)
 target_link_libraries(texas_holdem_game my_poker_lib)
 
 if (NOT MSVC)
-    target_compile_options(my_poker_lib PUBLIC "-Wall -Wextra -Wno-unused-parameter -Werror")
+    target_compile_options(my_poker_lib PUBLIC "-Wall")
+    target_compile_options(my_poker_lib PUBLIC "-Wextra")
+    target_compile_options(my_poker_lib PUBLIC "-Werror")
+    target_compile_options(my_poker_lib PUBLIC "-Wno-unused-parameter")
 endif()
