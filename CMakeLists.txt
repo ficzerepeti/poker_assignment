@@ -12,7 +12,9 @@ set(POKER_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/i_user_interaction.h
     ${CMAKE_CURRENT_LIST_DIR}/my_poker_lib.h
     ${CMAKE_CURRENT_LIST_DIR}/player_actions.h
+    ${CMAKE_CURRENT_LIST_DIR}/player_state.h
     ${CMAKE_CURRENT_LIST_DIR}/streamed_user_interaction.h
+    ${CMAKE_CURRENT_LIST_DIR}/table_state.h
     ${CMAKE_CURRENT_LIST_DIR}/table_state_manager.h
     ${CMAKE_CURRENT_LIST_DIR}/texas_holdem_game_orchestrator.h)
 set(POKER_SOURCES
@@ -21,6 +23,7 @@ set(POKER_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/my_poker_lib.cpp
     ${CMAKE_CURRENT_LIST_DIR}/player_actions.cpp
     ${CMAKE_CURRENT_LIST_DIR}/streamed_user_interaction.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/table_state.cpp
     ${CMAKE_CURRENT_LIST_DIR}/texas_holdem_game_orchestrator.cpp)
 
 add_library(my_poker_lib STATIC ${POKER_HEADERS} ${POKER_SOURCES})

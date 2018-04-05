@@ -1,41 +1,13 @@
 #pragma once
 
 #include <cstdint>
-#include <optional>
 #include <string>
-#include <vector>
 
 #include "game_stages.h"
 #include "player_actions.h"
+#include "table_state.h"
 
 namespace poker_lib {
-
-struct player_state
-{
-    uint64_t amount_needed_to_call = 0;
-    bool has_called_or_checked_already = false;
-    bool has_folded = false;
-
-    std::optional<std::string> pocket_cards;
-};
-
-struct table_state
-{
-    uint64_t small_blind_size;
-    uint64_t big_blind_size;
-
-    uint64_t pot;
-    std::string communal_cards;
-
-    std::vector<player_state> players;
-    size_t acting_player_pos;
-    size_t dealer_pos;
-    size_t small_blind_pos;
-    size_t big_blind_pos;
-
-    player_state& get_current_player() { return players.at(acting_player_pos); }
-    const player_state& get_current_player() const { return players.at(acting_player_pos); }
-};
 
 class i_table_state_manager
 {

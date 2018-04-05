@@ -62,6 +62,7 @@ bool table_state_manager::set_pocket_cards(const size_t player_pos, const std::s
     }
 
     _table_state.players.at(player_pos).pocket_cards = cards;
+    _current_stage = get_next_game_stage(_current_stage);
     return true;
 }
 
@@ -73,6 +74,7 @@ bool table_state_manager::set_flop(const std::string &cards)
     }
 
     _table_state.communal_cards = cards;
+    _current_stage = get_next_game_stage(_current_stage);
     return true;
 }
 
@@ -84,6 +86,7 @@ bool table_state_manager::set_turn(const std::string &card)
     }
 
     _table_state.communal_cards += card;
+    _current_stage = get_next_game_stage(_current_stage);
     return true;
 }
 
@@ -95,6 +98,7 @@ bool table_state_manager::set_river(const std::string &card)
     }
 
     _table_state.communal_cards += card;
+    _current_stage = get_next_game_stage(_current_stage);
     return true;
 }
 
@@ -116,17 +120,13 @@ bool table_state_manager::set_acting_player_action(const player_action_t &action
         break;
     }
 
-    // Hande this action
     std::visit([this](const auto& arg){ handle_betting_player_action(arg); }, action);
 
-    // Move to next player
-    _table_state.acting_player_pos = get_next_pos(_table_state.acting_player_pos, _table_state.players.size());
-    player_state& new_player = _table_state.players.at(_table_state.acting_player_pos);
-
-    // In case next player doesn't need to raise and all players checked/called then betting is over
-    if (new_player.amount_needed_to_call == 0 && new_player.has_called_or_checked_already)
+    const bool is_betting_still_ongoing = _table_state.move_to_next_betting_player();
+    if (!is_betting_still_ongoing)
     {
-        _current_stage = get_next_game_stage(_current_stage);
+        const bool at_least_two_left = _table_state.get_active_player_count() > 1;
+        _current_stage = at_least_two_left ? get_next_game_stage(_current_stage) : game_stages::showdown;
     }
 
     return true;
