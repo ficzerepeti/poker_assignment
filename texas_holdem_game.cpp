@@ -10,29 +10,16 @@ template<class T> struct always_false : std::false_type {};
 namespace poker_lib {
 
 texas_holdem_game::texas_holdem_game(i_user_interaction &user_interaction,
-                                     i_my_poker_lib &poker_lib,
+                                     i_game_engine &game_analysis_engine,
                                      const size_t user_stack,
                                      const size_t big_blind_size,
                                      const size_t num_of_players,
                                      const size_t user_pos)
 :
     _user_interaction(user_interaction),
-    _poker_lib(poker_lib),
-    _big_blind_size(big_blind_size),
-    _players(num_of_players)
+    _game_analysis_engine(game_analysis_engine),
+    _big_blind_size(big_blind_size)
 {
-    if (_players.size() < 2)
-    {
-        throw std::invalid_argument("Cannot play poker with less than two players at the table");
-    }
-    if (_players.size() <= user_pos)
-    {
-        std::ostringstream oss;
-        oss << "User position is set as " << user_pos << " which is not possible at a table size of " << _players.size();
-        throw std::invalid_argument(oss.str());
-    }
-    _players[user_pos].is_our_user = true;
-    _players[user_pos].stack = user_stack;
 }
 
 void texas_holdem_game::run_game()
@@ -200,7 +187,7 @@ double texas_holdem_game::calculate_user_equity() const
 {
     std::vector<std::string> hands(get_active_player_count(), "random");
     hands.front() = _pocket_cards;
-    return _poker_lib.calculate_equities(hands, _board).front();
+    return _game_analysis_engine.calculate_equities(hands, _board).front();
 }
 
 } // end of namespace poker_lib

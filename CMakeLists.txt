@@ -6,14 +6,22 @@ add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/../OMPEval" "${CMAKE_CURRENT_BINARY_
 set(CMAKE_CXX_STANDARD 17)
 
 set(POKER_HEADERS
+    ${CMAKE_CURRENT_LIST_DIR}/analysis_engine.h
+    ${CMAKE_CURRENT_LIST_DIR}/analysis_engine_factory.h
+    ${CMAKE_CURRENT_LIST_DIR}/game_engine.h
+    ${CMAKE_CURRENT_LIST_DIR}/i_analysis_engine.h
+    ${CMAKE_CURRENT_LIST_DIR}/i_analysis_engine_factory.h
     ${CMAKE_CURRENT_LIST_DIR}/i_my_poker_lib.h
-    ${CMAKE_CURRENT_LIST_DIR}/i_texas_holdem_game_state.h
+    ${CMAKE_CURRENT_LIST_DIR}/i_game_engine.h
     ${CMAKE_CURRENT_LIST_DIR}/i_user_interaction.h
     ${CMAKE_CURRENT_LIST_DIR}/my_poker_lib.h
     ${CMAKE_CURRENT_LIST_DIR}/player_actions.h
     ${CMAKE_CURRENT_LIST_DIR}/streamed_user_interaction.h
     ${CMAKE_CURRENT_LIST_DIR}/texas_holdem_game.h)
 set(POKER_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/analysis_engine.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/analysis_engine_factory.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/game_engine.cpp
     ${CMAKE_CURRENT_LIST_DIR}/my_poker_lib.cpp
     ${CMAKE_CURRENT_LIST_DIR}/player_actions.cpp
     ${CMAKE_CURRENT_LIST_DIR}/streamed_user_interaction.cpp

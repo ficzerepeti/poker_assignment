@@ -5,8 +5,12 @@
 
 namespace poker_lib {
 
-std::vector<double> my_poker_lib::calculate_equities(const std::vector<std::string> &hands,
-                                                          const std::string &board)
+bool my_poker_lib::is_valid_card_str(const std::string &cards)
+{
+    return omp::CardRange::getCardMask(cards) != 0;
+}
+
+std::vector<double> my_poker_lib::calculate_equities(const std::vector<std::string> &hands, const std::string &board)
 {
     if (hands.size() > omp::MAX_PLAYERS)
     {

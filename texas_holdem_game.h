@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 
+#include "i_game_engine.h"
 #include "i_user_interaction.h"
-#include "i_my_poker_lib.h"
 
 namespace poker_lib {
 
@@ -12,29 +12,15 @@ class texas_holdem_game
 {
 public:
     texas_holdem_game(i_user_interaction &user_interaction,
-                          i_my_poker_lib &poker_lib,
-                          const size_t user_stack,
-                          const size_t big_blind_size,
-                          const size_t num_of_players,
-                          const size_t user_pos);
+                      i_game_engine &game_analysis_engine,
+                      size_t user_stack,
+                      size_t big_blind_size,
+                      size_t num_of_players,
+                      size_t user_pos);
 
     void run_game();
 
 private:
-    struct player_state
-    {
-        uint64_t stack = 0;
-
-        std::vector<player_action_t> actions_taken;
-        uint64_t investment_in_pot = 0;
-        bool is_our_user = false;
-        bool is_all_in = false;
-
-        bool has_folded() const
-        {
-            return !actions_taken.empty() && std::holds_alternative<player_action_fold>(actions_taken.back());
-        }
-    };
 
     // Returns true if game ended. False otherwise
     bool run_betting_round();
@@ -45,11 +31,10 @@ private:
     double calculate_user_equity() const;
 
     i_user_interaction& _user_interaction;
-    i_my_poker_lib& _poker_lib;
+    i_game_engine& _game_analysis_engine;
 
     // per_game_state
     uint64_t _big_blind_size = 0;
-    std::vector<player_state> _players;
 
     uint64_t _pot_size = 0;
     uint64_t _max_investment = 0;
