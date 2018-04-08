@@ -125,6 +125,7 @@ bool table_state_manager::set_acting_player_action(const player_action_t &action
     const bool is_betting_still_ongoing = _table_state.move_to_next_betting_player();
     if (!is_betting_still_ongoing)
     {
+        _table_state.clear_per_betting_round_state_and_elect_next_acting_player();
         const bool at_least_two_left = _table_state.get_active_player_count() > 1;
         _current_stage = at_least_two_left ? get_next_game_stage(_current_stage) : game_stages::showdown;
     }

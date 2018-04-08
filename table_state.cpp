@@ -28,13 +28,30 @@ bool table_state::move_to_next_betting_player()
         }
     }
 
+    return false;
+}
+
+void table_state::clear_per_betting_round_state_and_elect_next_acting_player()
+{
+    // Reset current betting related state
     for (auto &player : players)
     {
         player.has_called_or_checked_already = false;
         player.amount_needed_to_call = 0;
     }
 
-    return false;
+    // Find first active player after dealer
+    for (auto pos = get_next_pos(dealer_pos, players.size());
+         pos != dealer_pos;
+         pos = get_next_pos(pos, players.size()))
+    {
+        auto& player = players.at(pos);
+        if (!player.has_folded)
+        {
+            acting_player_pos = pos;
+            return;
+        }
+    }
 }
 
 } // end of namespace poker_lib

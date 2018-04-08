@@ -28,8 +28,12 @@ struct table_state
     // Number of players that haven't folded so far
     size_t get_active_player_count() const;
 
-    // Returns false if no player may act in this round and sets up players for next betting round. True otherwise.
+    // Returns false if no player may act in this betting round meaning this round has finished. True otherwise.
     bool move_to_next_betting_player();
+
+    // Calling this method resets per betting round state and sets acting player to the first active player after
+    // the dealer. Note: if get_active_player_count() returns <2 then game has finished.
+    void clear_per_betting_round_state_and_elect_next_acting_player();
 };
 
 } // end of namespace poker_lib
