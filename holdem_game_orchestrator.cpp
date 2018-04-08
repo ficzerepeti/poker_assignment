@@ -3,16 +3,16 @@
 #include <sstream>
 #include <type_traits>
 
-#include "texas_holdem_game_orchestrator.h"
+#include "holdem_game_orchestrator.h"
 
 template<class T> struct always_false : std::false_type {};
 
 namespace poker_lib {
 
-texas_holdem_game_orchestrator::texas_holdem_game_orchestrator(i_my_poker_lib& poker_lib,
-                                                               i_user_interaction &user_interaction,
-                                                               i_table_state_manager &table_state_manager,
-                                                               const size_t user_pos)
+holdem_game_orchestrator::holdem_game_orchestrator(i_my_poker_lib& poker_lib,
+                                                   i_user_interaction &user_interaction,
+                                                   i_table_state_manager &table_state_manager,
+                                                   const size_t user_pos)
 :
     _poker_lib(poker_lib),
     _user_interaction(user_interaction),
@@ -21,7 +21,7 @@ texas_holdem_game_orchestrator::texas_holdem_game_orchestrator(i_my_poker_lib& p
 {
 }
 
-void texas_holdem_game_orchestrator::run_game()
+void holdem_game_orchestrator::run_game()
 {
     while (true)
     {
@@ -65,10 +65,10 @@ void texas_holdem_game_orchestrator::run_game()
     }
 }
 
-player_action_t texas_holdem_game_orchestrator::get_acting_player_action()
+player_action_t holdem_game_orchestrator::get_acting_player_action()
 {
     const auto& table = _table_state_manager.get_table_state();
-    const auto& player = table.get_current_player();
+    const auto& player = get_current_player(table);
 
     const bool is_opponent = table.acting_player_pos != _user_pos;
     if (is_opponent)
@@ -91,7 +91,7 @@ player_action_t texas_holdem_game_orchestrator::get_acting_player_action()
     return _user_interaction.get_user_action(table.acting_player_pos, recommended_action);
 }
 
-double texas_holdem_game_orchestrator::calculate_user_equity(const table_state& table) const
+double holdem_game_orchestrator::calculate_user_equity(const table_state& table) const
 {
     std::vector<std::string> hands;
     for (const auto& player : table.players)

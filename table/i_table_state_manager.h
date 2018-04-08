@@ -3,9 +3,9 @@
 #include <cstdint>
 #include <string>
 
-#include "game_stages.h"
-#include "player_actions.h"
-#include "table_state.h"
+#include "table/game_stages.h"
+#include "table/player_actions.h"
+#include "table/table_state.h"
 
 namespace poker_lib {
 

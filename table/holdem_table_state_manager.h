@@ -8,15 +8,15 @@
 
 namespace poker_lib {
 
-class table_state_manager : public i_table_state_manager
+class holdem_table_state_manager : public i_table_state_manager
 {
 public:
-    table_state_manager(size_t num_of_players,
+    holdem_table_state_manager(size_t num_of_players,
                         size_t dealer_position,
                         uint64_t small_blind_size,
                         uint64_t big_blind_size);
 
-    ~table_state_manager() override = default;
+    ~holdem_table_state_manager() override = default;
 
     game_stages get_current_game_stage() const override { return _current_stage; }
     const table_state &get_table_state() const override { return _table_state; }

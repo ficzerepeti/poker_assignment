@@ -1,7 +1,7 @@
 #pragma once
 
 #include <variant>
-#include "player_actions.h"
+#include "table/player_actions.h"
 
 namespace poker_lib {
 

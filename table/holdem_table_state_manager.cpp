@@ -1,7 +1,7 @@
 #include <sstream>
 #include <type_traits>
 
-#include "table_state_manager.h"
+#include "holdem_table_state_manager.h"
 
 static size_t get_next_pos(const size_t current_pos, const size_t num_of_players)
 {
@@ -10,7 +10,7 @@ static size_t get_next_pos(const size_t current_pos, const size_t num_of_players
 
 namespace poker_lib {
 
-table_state_manager::table_state_manager(const size_t num_of_players,
+holdem_table_state_manager::holdem_table_state_manager(const size_t num_of_players,
                                          const size_t dealer_position,
                                          const uint64_t small_blind_size,
                                          const uint64_t big_blind_size)
@@ -54,7 +54,7 @@ table_state_manager::table_state_manager(const size_t num_of_players,
     _table_state.players.at(_table_state.big_blind_pos).amount_needed_to_call = big_blind_size;
 }
 
-bool table_state_manager::set_pocket_cards(const size_t player_pos, const std::string &cards)
+bool holdem_table_state_manager::set_pocket_cards(const size_t player_pos, const std::string &cards)
 {
     if (_current_stage != game_stages::deal_pocket_cards)
     {
@@ -66,7 +66,7 @@ bool table_state_manager::set_pocket_cards(const size_t player_pos, const std::s
     return true;
 }
 
-bool table_state_manager::set_flop(const std::string &cards)
+bool holdem_table_state_manager::set_flop(const std::string &cards)
 {
     if (_current_stage != game_stages::deal_communal_cards)
     {
@@ -78,7 +78,7 @@ bool table_state_manager::set_flop(const std::string &cards)
     return true;
 }
 
-bool table_state_manager::set_turn(const std::string &card)
+bool holdem_table_state_manager::set_turn(const std::string &card)
 {
     if (_current_stage != game_stages::deal_turn_card)
     {
@@ -90,7 +90,7 @@ bool table_state_manager::set_turn(const std::string &card)
     return true;
 }
 
-bool table_state_manager::set_river(const std::string &card)
+bool holdem_table_state_manager::set_river(const std::string &card)
 {
     if (_current_stage != game_stages::deal_river_card)
     {
@@ -102,7 +102,7 @@ bool table_state_manager::set_river(const std::string &card)
     return true;
 }
 
-bool table_state_manager::set_acting_player_action(const player_action_t &action)
+bool holdem_table_state_manager::set_acting_player_action(const player_action_t &action)
 {
     switch (_current_stage)
     {
@@ -122,18 +122,18 @@ bool table_state_manager::set_acting_player_action(const player_action_t &action
 
     std::visit([this](const auto& arg){ handle_betting_player_action(arg); }, action);
 
-    const bool is_betting_still_ongoing = _table_state.move_to_next_betting_player();
+    const bool is_betting_still_ongoing = move_to_next_betting_player(_table_state);
     if (!is_betting_still_ongoing)
     {
-        _table_state.clear_per_betting_round_state_and_elect_next_acting_player();
-        const bool at_least_two_left = _table_state.get_active_player_count() > 1;
+        clear_per_betting_round_state_and_elect_next_acting_player(_table_state);
+        const bool at_least_two_left = get_active_player_count(_table_state) > 1;
         _current_stage = at_least_two_left ? get_next_game_stage(_current_stage) : game_stages::showdown;
     }
 
     return true;
 }
 
-void table_state_manager::handle_betting_player_action(const player_action_fold &action)
+void holdem_table_state_manager::handle_betting_player_action(const player_action_fold &action)
 {
     player_state& player = _table_state.players.at(_table_state.acting_player_pos);
 
@@ -142,7 +142,7 @@ void table_state_manager::handle_betting_player_action(const player_action_fold 
     player.amount_needed_to_call = 0;
 }
 
-void table_state_manager::handle_betting_player_action(const player_action_check_or_call &action)
+void holdem_table_state_manager::handle_betting_player_action(const player_action_check_or_call &action)
 {
     player_state& player = _table_state.players.at(_table_state.acting_player_pos);
 
@@ -151,7 +151,7 @@ void table_state_manager::handle_betting_player_action(const player_action_check
     player.amount_needed_to_call = 0;
 }
 
-void table_state_manager::handle_betting_player_action(const player_action_raise &action)
+void holdem_table_state_manager::handle_betting_player_action(const player_action_raise &action)
 {
     player_state& player = _table_state.players.at(_table_state.acting_player_pos);
 

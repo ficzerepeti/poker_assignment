@@ -4,18 +4,18 @@
 #include <vector>
 
 #include "i_my_poker_lib.h"
-#include "i_table_state_manager.h"
+#include "table/i_table_state_manager.h"
 #include "i_user_interaction.h"
 
 namespace poker_lib {
 
-class texas_holdem_game_orchestrator
+class holdem_game_orchestrator
 {
 public:
-    texas_holdem_game_orchestrator(i_my_poker_lib& poker_lib,
-                                   i_user_interaction &user_interaction,
-                                   i_table_state_manager &table_state_manager,
-                                   size_t user_pos);
+    holdem_game_orchestrator(i_my_poker_lib& poker_lib,
+                             i_user_interaction &user_interaction,
+                             i_table_state_manager &table_state_manager,
+                             size_t user_pos);
 
     void run_game();
 
