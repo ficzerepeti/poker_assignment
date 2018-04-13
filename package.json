@@ -1,6 +1,0 @@
-{
-  "dependencies" :
-  {
-    "OMPEval" : "git+https://ficzerepeti@github.com/ficzerepeti/OMPEval.git"
-  }
-}

@@ -8,12 +8,25 @@ static size_t get_next_pos(const size_t current_pos, const size_t num_of_players
     return (current_pos + 1) % num_of_players;
 }
 
+static void throw_if_unexpected_call(const poker_lib::game_stages current_stage,
+                                     const poker_lib::game_stages expected_stage,
+                                     const char * const func_name)
+{
+    if (current_stage != expected_stage)
+    {
+        std::ostringstream oss;
+        oss << "Call to " << func_name << " was expected to be called in stage "
+            << expected_stage << " however current stage is " << current_stage;
+        throw std::logic_error(oss.str());
+    }
+}
+
 namespace poker_lib {
 
 holdem_table_state_manager::holdem_table_state_manager(const size_t num_of_players,
-                                         const size_t dealer_position,
-                                         const uint64_t small_blind_size,
-                                         const uint64_t big_blind_size)
+                                                       const size_t dealer_position,
+                                                       const uint64_t small_blind_size,
+                                                       const uint64_t big_blind_size)
 :
     _current_stage(game_stages::deal_pocket_cards),
     _table_state()
@@ -26,6 +39,12 @@ holdem_table_state_manager::holdem_table_state_manager(const size_t num_of_playe
     {
         std::ostringstream oss;
         oss << "Player count " << num_of_players << " is not enough to have the dealer at position (zero indexed) " << dealer_position;
+        throw std::invalid_argument(oss.str());
+    }
+    if (small_blind_size >= big_blind_size)
+    {
+        std::ostringstream oss;
+        oss << "Small blind size " << small_blind_size << " is larger or equal to big blind size " << big_blind_size;
         throw std::invalid_argument(oss.str());
     }
 
@@ -50,59 +69,43 @@ holdem_table_state_manager::holdem_table_state_manager(const size_t num_of_playe
     }
 
     _table_state.players.resize(num_of_players, player_state{ big_blind_size, false, false, {} });
-    _table_state.players.at(_table_state.small_blind_pos).amount_needed_to_call = small_blind_size;
-    _table_state.players.at(_table_state.big_blind_pos).amount_needed_to_call = big_blind_size;
+    _table_state.players.at(_table_state.small_blind_pos).amount_needed_to_call = big_blind_size - small_blind_size;
+    _table_state.players.at(_table_state.big_blind_pos).amount_needed_to_call = 0;
 }
 
-bool holdem_table_state_manager::set_pocket_cards(const size_t player_pos, const std::string &cards)
+void holdem_table_state_manager::set_pocket_cards(size_t player_pos, const std::string &cards)
 {
-    if (_current_stage != game_stages::deal_pocket_cards)
-    {
-        return false;
-    }
+    throw_if_unexpected_call(_current_stage, game_stages::deal_pocket_cards, __func__);
 
     _table_state.players.at(player_pos).pocket_cards = cards;
     _current_stage = get_next_game_stage(_current_stage);
-    return true;
 }
 
-bool holdem_table_state_manager::set_flop(const std::string &cards)
+void holdem_table_state_manager::set_flop(const std::string &cards)
 {
-    if (_current_stage != game_stages::deal_communal_cards)
-    {
-        return false;
-    }
+    throw_if_unexpected_call(_current_stage, game_stages::deal_communal_cards, __func__);
 
     _table_state.communal_cards = cards;
     _current_stage = get_next_game_stage(_current_stage);
-    return true;
 }
 
-bool holdem_table_state_manager::set_turn(const std::string &card)
+void holdem_table_state_manager::set_turn(const std::string &card)
 {
-    if (_current_stage != game_stages::deal_turn_card)
-    {
-        return false;
-    }
+    throw_if_unexpected_call(_current_stage, game_stages::deal_turn_card, __func__);
 
     _table_state.communal_cards += card;
     _current_stage = get_next_game_stage(_current_stage);
-    return true;
 }
 
-bool holdem_table_state_manager::set_river(const std::string &card)
+void holdem_table_state_manager::set_river(const std::string &card)
 {
-    if (_current_stage != game_stages::deal_river_card)
-    {
-        return false;
-    }
+    throw_if_unexpected_call(_current_stage, game_stages::deal_river_card, __func__);
 
     _table_state.communal_cards += card;
     _current_stage = get_next_game_stage(_current_stage);
-    return true;
 }
 
-bool holdem_table_state_manager::set_acting_player_action(const player_action_t &action)
+void holdem_table_state_manager::set_acting_player_action(const player_action_t &action)
 {
     switch (_current_stage)
     {
@@ -111,7 +114,11 @@ bool holdem_table_state_manager::set_acting_player_action(const player_action_t 
     case game_stages::deal_turn_card:
     case game_stages::deal_river_card:
     case game_stages::showdown:
-        return false;
+    {
+        std::ostringstream oss;
+        oss << __func__ << " was called when current stage is " << _current_stage;
+        throw std::logic_error(oss.str());
+    }
 
     case game_stages::pre_flop_betting_round:
     case game_stages::flop_betting_round:
@@ -129,8 +136,6 @@ bool holdem_table_state_manager::set_acting_player_action(const player_action_t 
         const bool at_least_two_left = get_active_player_count(_table_state) > 1;
         _current_stage = at_least_two_left ? get_next_game_stage(_current_stage) : game_stages::showdown;
     }
-
-    return true;
 }
 
 void holdem_table_state_manager::handle_betting_player_action(const player_action_fold &action)

@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <ostream>
 
 #include "player_state.h"
 
@@ -22,6 +23,8 @@ struct table_state
     size_t small_blind_pos;
     size_t big_blind_pos;
 };
+bool operator==(const table_state &lhs, const table_state &rhs);
+std::ostream &operator<<(std::ostream &os, const table_state &state);
 
 const player_state& get_current_player(const table_state& table);
 

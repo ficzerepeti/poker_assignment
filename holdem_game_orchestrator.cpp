@@ -1,11 +1,8 @@
 #include <algorithm>
-#include <stdexcept>
 #include <sstream>
 #include <type_traits>
 
 #include "holdem_game_orchestrator.h"
-
-template<class T> struct always_false : std::false_type {};
 
 namespace poker_lib {
 
@@ -25,42 +22,33 @@ void holdem_game_orchestrator::run_game()
 {
     while (true)
     {
-        bool success = false;
-        const auto current_stage = _table_state_manager.get_current_game_stage();
-        switch (current_stage)
+        switch (_table_state_manager.get_current_game_stage())
         {
         case game_stages::deal_pocket_cards:
-            success = _table_state_manager.set_pocket_cards(_user_pos, _user_interaction.get_pocket_cards());
+            _table_state_manager.set_pocket_cards(_user_pos, _user_interaction.get_pocket_cards());
             break;
 
         case game_stages::deal_communal_cards:
-            success = _table_state_manager.set_flop(_user_interaction.get_flop());
+            _table_state_manager.set_flop(_user_interaction.get_flop());
             break;
 
         case game_stages::deal_turn_card:
-            success = _table_state_manager.set_turn(_user_interaction.get_turn());
+            _table_state_manager.set_turn(_user_interaction.get_turn());
             break;
 
         case game_stages::deal_river_card:
-            success = _table_state_manager.set_river(_user_interaction.get_river());
+            _table_state_manager.set_river(_user_interaction.get_river());
             break;
 
         case game_stages::pre_flop_betting_round:
         case game_stages::flop_betting_round:
         case game_stages::turn_betting_round:
         case game_stages::river_betting_round:
-            success = _table_state_manager.set_acting_player_action(get_acting_player_action());
+            _table_state_manager.set_acting_player_action(get_acting_player_action());
             break;
 
         case game_stages::showdown:
             return;
-        }
-
-        if (!success)
-        {
-            std::ostringstream oss;
-            oss << "Failed to handle game stage " << current_stage;
-            throw std::logic_error(oss.str());
         }
     }
 }

@@ -12,21 +12,21 @@ class holdem_table_state_manager : public i_table_state_manager
 {
 public:
     holdem_table_state_manager(size_t num_of_players,
-                        size_t dealer_position,
-                        uint64_t small_blind_size,
-                        uint64_t big_blind_size);
+                               size_t dealer_position,
+                               uint64_t small_blind_size,
+                               uint64_t big_blind_size);
 
     ~holdem_table_state_manager() override = default;
 
     game_stages get_current_game_stage() const override { return _current_stage; }
     const table_state &get_table_state() const override { return _table_state; }
 
-    bool set_pocket_cards(size_t player_pos, const std::string &cards) override;
-    bool set_flop(const std::string &cards) override;
-    bool set_turn(const std::string &card) override;
-    bool set_river(const std::string &card) override;
+    void set_pocket_cards(size_t player_pos, const std::string &cards) override;
+    void set_flop(const std::string &cards) override;
+    void set_turn(const std::string &card) override;
+    void set_river(const std::string &card) override;
 
-    bool set_acting_player_action(const player_action_t &action) override;
+    void set_acting_player_action(const player_action_t &action) override;
 
 private:
     void handle_betting_player_action(const player_action_fold &action);
