@@ -93,6 +93,7 @@ void holdem_table_state_manager::set_turn(const std::string &card)
 {
     throw_if_unexpected_call(_current_stage, game_stages::deal_turn_card, __func__);
 
+    _table_state.communal_cards += ' ';
     _table_state.communal_cards += card;
     _current_stage = get_next_game_stage(_current_stage);
 }
@@ -101,6 +102,7 @@ void holdem_table_state_manager::set_river(const std::string &card)
 {
     throw_if_unexpected_call(_current_stage, game_stages::deal_river_card, __func__);
 
+    _table_state.communal_cards += ' ';
     _table_state.communal_cards += card;
     _current_stage = get_next_game_stage(_current_stage);
 }
@@ -113,7 +115,7 @@ void holdem_table_state_manager::set_acting_player_action(const player_action_t 
     case game_stages::deal_communal_cards:
     case game_stages::deal_turn_card:
     case game_stages::deal_river_card:
-    case game_stages::showdown:
+    case game_stages::end_of_game:
     {
         std::ostringstream oss;
         oss << __func__ << " was called when current stage is " << _current_stage;
@@ -134,7 +136,7 @@ void holdem_table_state_manager::set_acting_player_action(const player_action_t 
     {
         clear_per_betting_round_state_and_elect_next_acting_player(_table_state);
         const bool at_least_two_left = get_active_player_count(_table_state) > 1;
-        _current_stage = at_least_two_left ? get_next_game_stage(_current_stage) : game_stages::showdown;
+        _current_stage = at_least_two_left ? get_next_game_stage(_current_stage) : game_stages::end_of_game;
     }
 }
 
@@ -142,7 +144,7 @@ void holdem_table_state_manager::handle_betting_player_action(const player_actio
 {
     player_state& player = _table_state.players.at(_table_state.acting_player_pos);
 
-    player.has_called_or_checked_already = true;
+    player.has_acted_in_betting = true;
     player.has_folded = true;
     player.amount_needed_to_call = 0;
 }
@@ -151,7 +153,7 @@ void holdem_table_state_manager::handle_betting_player_action(const player_actio
 {
     player_state& player = _table_state.players.at(_table_state.acting_player_pos);
 
-    player.has_called_or_checked_already = true;
+    player.has_acted_in_betting = true;
     _table_state.pot += player.amount_needed_to_call;
     player.amount_needed_to_call = 0;
 }
@@ -165,10 +167,10 @@ void holdem_table_state_manager::handle_betting_player_action(const player_actio
     // Update all player states to reflect this raise
     for (player_state& a_player : _table_state.players)
     {
-        a_player.has_called_or_checked_already = false;
+        a_player.has_acted_in_betting = false;
         a_player.amount_needed_to_call += action.amount_raised_above_call;
     }
-    player.has_called_or_checked_already = true;
+    player.has_acted_in_betting = true;
     player.amount_needed_to_call = 0;
 }
 

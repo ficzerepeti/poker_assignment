@@ -47,7 +47,7 @@ void holdem_game_orchestrator::run_game()
             _table_state_manager.set_acting_player_action(get_acting_player_action());
             break;
 
-        case game_stages::showdown:
+        case game_stages::end_of_game:
             return;
         }
     }

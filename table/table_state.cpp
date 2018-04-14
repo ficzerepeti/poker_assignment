@@ -81,7 +81,7 @@ void clear_per_betting_round_state_and_elect_next_acting_player(table_state& tab
     // Reset current betting related state
     for (auto &player : table.players)
     {
-        player.has_called_or_checked_already = false;
+        player.has_acted_in_betting = false;
         player.amount_needed_to_call = 0;
     }
 
