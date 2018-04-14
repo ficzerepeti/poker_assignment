@@ -3,11 +3,6 @@
 
 #include "holdem_table_state_manager.h"
 
-static size_t get_next_pos(const size_t current_pos, const size_t num_of_players)
-{
-    return (current_pos + 1) % num_of_players;
-}
-
 static void throw_if_unexpected_call(const poker_lib::game_stages current_stage,
                                      const poker_lib::game_stages expected_stage,
                                      const char * const func_name)
@@ -134,7 +129,9 @@ void holdem_table_state_manager::set_acting_player_action(const player_action_t 
     const bool is_betting_still_ongoing = move_to_next_betting_player(_table_state);
     if (!is_betting_still_ongoing)
     {
-        clear_per_betting_round_state_and_elect_next_acting_player(_table_state);
+        reset_players_after_betting(_table_state);
+        elect_next_acting_player_after_betting(_table_state);
+
         const bool at_least_two_left = get_active_player_count(_table_state) > 1;
         _current_stage = at_least_two_left ? get_next_game_stage(_current_stage) : game_stages::end_of_game;
     }

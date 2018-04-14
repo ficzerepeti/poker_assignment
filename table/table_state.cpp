@@ -1,11 +1,6 @@
 #include <algorithm>
 #include "table_state.h"
 
-static size_t get_next_pos(const size_t current_pos, const size_t num_of_players)
-{
-    return (current_pos + 1) % num_of_players;
-}
-
 namespace std {
 
 template <typename T>
@@ -76,15 +71,8 @@ bool move_to_next_betting_player(table_state& table)
     return false;
 }
 
-void clear_per_betting_round_state_and_elect_next_acting_player(table_state& table)
+void elect_next_acting_player_after_betting(table_state &table)
 {
-    // Reset current betting related state
-    for (auto &player : table.players)
-    {
-        player.has_acted_in_betting = false;
-        player.amount_needed_to_call = 0;
-    }
-
     // Find first active player after dealer
     for (auto pos = get_next_pos(table.dealer_pos, table.players.size());
          pos != table.dealer_pos;
@@ -96,6 +84,20 @@ void clear_per_betting_round_state_and_elect_next_acting_player(table_state& tab
             table.acting_player_pos = pos;
             return;
         }
+    }
+}
+
+size_t get_next_pos(const size_t current_pos, const size_t num_of_players)
+{
+    return (current_pos + 1) % num_of_players;
+}
+
+void reset_players_after_betting(table_state& table)
+{
+    for (auto &player : table.players)
+    {
+        player.amount_needed_to_call = 0;
+        player.has_acted_in_betting = false;
     }
 }
 

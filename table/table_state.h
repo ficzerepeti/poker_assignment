@@ -34,8 +34,10 @@ size_t get_active_player_count(const table_state& table);
 // Returns false if no player may act in this betting round meaning this round has finished. True otherwise.
 bool move_to_next_betting_player(table_state& table);
 
-// Calling this method resets per betting round state and sets acting player to the first active player after
-// the dealer. Note: if get_active_player_count() returns <2 then game has finished.
-void clear_per_betting_round_state_and_elect_next_acting_player(table_state& table);
+void reset_players_after_betting(table_state& table);
+// Sets acting player to the first active player after the dealer.
+void elect_next_acting_player_after_betting(table_state &table);
+
+size_t get_next_pos(size_t current_pos, size_t num_of_players);
 
 } // end of namespace poker_lib
