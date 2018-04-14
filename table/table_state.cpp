@@ -6,9 +6,10 @@ namespace std {
 template <typename T>
 std::ostream& operator<<(std::ostream& os, const std::vector<T>& container)
 {
-    for (const T &elem : container)
+    for (size_t pos = 0; pos < container.size(); ++pos)
     {
-        os << elem << ",, ";
+        const auto& elem = container[pos];
+        os << "pos: " << pos << ", elem: " << elem << ",, ";
     }
     return os;
 }
@@ -41,6 +42,11 @@ std::ostream& operator<<(std::ostream &os, const table_state &state)
               << ", dealer_pos: " << state.dealer_pos
               << ", small_blind_pos: " << state.small_blind_pos
               << ", big_blind_pos: " << state.big_blind_pos;
+}
+
+player_state &get_current_player(table_state &table)
+{
+    return table.players.at(table.acting_player_pos);
 }
 
 const player_state &get_current_player(const table_state &table)

@@ -18,6 +18,7 @@ struct table_state
     std::string communal_cards;
 
     std::vector<player_state> players;
+    // Positions are 0 based (players[pos] selects that player
     size_t acting_player_pos;
     size_t dealer_pos;
     size_t small_blind_pos;
@@ -26,6 +27,7 @@ struct table_state
 bool operator==(const table_state &lhs, const table_state &rhs);
 std::ostream &operator<<(std::ostream &os, const table_state &state);
 
+player_state& get_current_player(table_state& table);
 const player_state& get_current_player(const table_state& table);
 
 // Number of players that haven't folded so far

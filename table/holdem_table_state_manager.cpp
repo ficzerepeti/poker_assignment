@@ -157,15 +157,18 @@ void holdem_table_state_manager::handle_betting_player_action(const player_actio
 
 void holdem_table_state_manager::handle_betting_player_action(const player_action_raise &action)
 {
-    player_state& player = _table_state.players.at(_table_state.acting_player_pos);
+    player_state& player = get_current_player(_table_state);
 
     _table_state.pot += player.amount_needed_to_call + action.amount_raised_above_call;
 
     // Update all player states to reflect this raise
     for (player_state& a_player : _table_state.players)
     {
-        a_player.has_acted_in_betting = false;
-        a_player.amount_needed_to_call += action.amount_raised_above_call;
+        if (!a_player.has_folded)
+        {
+            a_player.has_acted_in_betting = false;
+            a_player.amount_needed_to_call += action.amount_raised_above_call;
+        }
     }
     player.has_acted_in_betting = true;
     player.amount_needed_to_call = 0;
