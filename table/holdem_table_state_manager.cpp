@@ -70,10 +70,11 @@ holdem_table_state_manager::holdem_table_state_manager(const size_t num_of_playe
 
 void holdem_table_state_manager::set_pocket_cards(size_t player_pos, const std::string &cards)
 {
-    throw_if_unexpected_call(_current_stage, game_stages::deal_pocket_cards, __func__);
-
     _table_state.players.at(player_pos).pocket_cards = cards;
-    _current_stage = get_next_game_stage(_current_stage);
+    if (_current_stage == game_stages::deal_pocket_cards)
+    {
+        _current_stage = get_next_game_stage(_current_stage);
+    }
 }
 
 void holdem_table_state_manager::set_flop(const std::string &cards)

@@ -108,6 +108,151 @@ TEST(test_holdem_table_state_manager, starting_state_3_players_2nd_player_deals)
     EXPECT_EQ(expected, state_manager.get_table_state());
 }
 
+TEST(test_holdem_table_state_manager, throws_if_unexpected_method_called)
+{
+    poker_lib::table_state expected{};
+    expected.small_blind_size = 10;
+    expected.big_blind_size = 20;
+    expected.pot = 30;
+    expected.acting_player_pos = 0;
+    expected.dealer_pos = 0;
+    expected.small_blind_pos = 0;
+    expected.big_blind_pos = 1;
+
+    expected.players.emplace_back(poker_lib::player_state{10, false, false, std::optional<std::string>{} });
+    expected.players.emplace_back(poker_lib::player_state{0, false, false, std::optional<std::string>{} });
+
+    poker_lib::holdem_table_state_manager state_manager(expected.players.size(),
+                                                        expected.dealer_pos,
+                                                        expected.small_blind_size,
+                                                        expected.big_blind_size);
+
+    // Dealing pocket cards
+    EXPECT_ANY_THROW(state_manager.set_flop("Ts 9d 3c"));
+    EXPECT_ANY_THROW(state_manager.set_river("Ts"));
+    EXPECT_ANY_THROW(state_manager.set_turn("Ts"));
+    EXPECT_ANY_THROW(state_manager.set_acting_player_action(poker_lib::player_action_fold{}));
+    EXPECT_EQ(poker_lib::game_stages::deal_pocket_cards, state_manager.get_current_game_stage());
+    EXPECT_EQ(expected, state_manager.get_table_state());
+
+    // Move to pre-flop betting
+    expected.players.at(0).pocket_cards.emplace("Ac Kd");
+    expected.players.at(1).pocket_cards.emplace("As Ks");
+    EXPECT_NO_THROW(state_manager.set_pocket_cards(0, *expected.players.at(0).pocket_cards));
+    EXPECT_NO_THROW(state_manager.set_pocket_cards(1, *expected.players.at(1).pocket_cards));
+
+    EXPECT_EQ(expected, state_manager.get_table_state());
+    EXPECT_EQ(poker_lib::game_stages::pre_flop_betting_round, state_manager.get_current_game_stage());
+    EXPECT_ANY_THROW(state_manager.set_flop("Ts 9d 3c"));
+    EXPECT_ANY_THROW(state_manager.set_turn("8s"));
+    EXPECT_ANY_THROW(state_manager.set_river("9s"));
+    EXPECT_EQ(expected, state_manager.get_table_state());
+    EXPECT_EQ(poker_lib::game_stages::pre_flop_betting_round, state_manager.get_current_game_stage());
+
+    // Move to flop
+    EXPECT_NO_THROW(state_manager.set_acting_player_action(poker_lib::player_action_check_or_call{}));
+    EXPECT_NO_THROW(state_manager.set_acting_player_action(poker_lib::player_action_check_or_call{}));
+    expected.pot += expected.small_blind_size;
+    expected.players.at(0).amount_needed_to_call = 0;
+    expected.acting_player_pos = 1;
+    EXPECT_EQ(expected, state_manager.get_table_state());
+    EXPECT_EQ(poker_lib::game_stages::deal_communal_cards, state_manager.get_current_game_stage());
+
+    // Flop
+    EXPECT_NO_THROW(state_manager.set_pocket_cards(0, *expected.players.at(0).pocket_cards));
+    EXPECT_NO_THROW(state_manager.set_pocket_cards(1, *expected.players.at(1).pocket_cards));
+    EXPECT_ANY_THROW(state_manager.set_acting_player_action(poker_lib::player_action_check_or_call{}));
+    EXPECT_ANY_THROW(state_manager.set_turn("8s"));
+    EXPECT_ANY_THROW(state_manager.set_river("9s"));
+
+    // Move to flop betting
+    expected.communal_cards = "Ts 9d 3c";
+    EXPECT_NO_THROW(state_manager.set_flop(expected.communal_cards));
+    EXPECT_EQ(expected, state_manager.get_table_state());
+    EXPECT_EQ(poker_lib::game_stages::flop_betting_round, state_manager.get_current_game_stage());
+
+    // Flop betting
+    EXPECT_NO_THROW(state_manager.set_pocket_cards(0, *expected.players.at(0).pocket_cards));
+    EXPECT_NO_THROW(state_manager.set_pocket_cards(1, *expected.players.at(1).pocket_cards));
+    EXPECT_ANY_THROW(state_manager.set_flop("Ts 9d 3c"));
+    EXPECT_ANY_THROW(state_manager.set_turn("8s"));
+    EXPECT_ANY_THROW(state_manager.set_river("9s"));
+    EXPECT_EQ(expected, state_manager.get_table_state());
+    EXPECT_EQ(poker_lib::game_stages::flop_betting_round, state_manager.get_current_game_stage());
+
+    // Move to turn
+    EXPECT_NO_THROW(state_manager.set_acting_player_action(poker_lib::player_action_check_or_call{}));
+    EXPECT_NO_THROW(state_manager.set_acting_player_action(poker_lib::player_action_check_or_call{}));
+    EXPECT_EQ(expected, state_manager.get_table_state());
+    EXPECT_EQ(poker_lib::game_stages::deal_turn_card, state_manager.get_current_game_stage());
+
+    // Turn
+    EXPECT_NO_THROW(state_manager.set_pocket_cards(0, *expected.players.at(0).pocket_cards));
+    EXPECT_NO_THROW(state_manager.set_pocket_cards(1, *expected.players.at(1).pocket_cards));
+    EXPECT_ANY_THROW(state_manager.set_acting_player_action(poker_lib::player_action_check_or_call{}));
+    EXPECT_ANY_THROW(state_manager.set_flop("Ts 9d 3c"));
+    EXPECT_ANY_THROW(state_manager.set_river("9s"));
+
+    // Move to turn betting
+    expected.communal_cards += " 9s";
+    EXPECT_NO_THROW(state_manager.set_turn("9s"));
+    EXPECT_EQ(expected, state_manager.get_table_state());
+    EXPECT_EQ(poker_lib::game_stages::turn_betting_round, state_manager.get_current_game_stage());
+
+    // Turn betting
+    EXPECT_NO_THROW(state_manager.set_pocket_cards(0, *expected.players.at(0).pocket_cards));
+    EXPECT_NO_THROW(state_manager.set_pocket_cards(1, *expected.players.at(1).pocket_cards));
+    EXPECT_ANY_THROW(state_manager.set_flop("Ts 9d 3c"));
+    EXPECT_ANY_THROW(state_manager.set_turn("8s"));
+    EXPECT_ANY_THROW(state_manager.set_river("9s"));
+    EXPECT_EQ(expected, state_manager.get_table_state());
+    EXPECT_EQ(poker_lib::game_stages::turn_betting_round, state_manager.get_current_game_stage());
+
+    // Move to river
+    EXPECT_NO_THROW(state_manager.set_acting_player_action(poker_lib::player_action_check_or_call{}));
+    EXPECT_NO_THROW(state_manager.set_acting_player_action(poker_lib::player_action_check_or_call{}));
+    EXPECT_EQ(expected, state_manager.get_table_state());
+    EXPECT_EQ(poker_lib::game_stages::deal_river_card, state_manager.get_current_game_stage());
+
+    // River
+    EXPECT_NO_THROW(state_manager.set_pocket_cards(0, *expected.players.at(0).pocket_cards));
+    EXPECT_NO_THROW(state_manager.set_pocket_cards(1, *expected.players.at(1).pocket_cards));
+    EXPECT_ANY_THROW(state_manager.set_acting_player_action(poker_lib::player_action_check_or_call{}));
+    EXPECT_ANY_THROW(state_manager.set_flop("Ts 9d 3c"));
+    EXPECT_ANY_THROW(state_manager.set_turn("8s"));
+
+    // Move to river betting
+    expected.communal_cards += " 8s";
+    EXPECT_NO_THROW(state_manager.set_river("8s"));
+    EXPECT_EQ(expected, state_manager.get_table_state());
+    EXPECT_EQ(poker_lib::game_stages::river_betting_round, state_manager.get_current_game_stage());
+
+    // River betting
+    EXPECT_NO_THROW(state_manager.set_pocket_cards(0, *expected.players.at(0).pocket_cards));
+    EXPECT_NO_THROW(state_manager.set_pocket_cards(1, *expected.players.at(1).pocket_cards));
+    EXPECT_ANY_THROW(state_manager.set_flop("Ts 9d 3c"));
+    EXPECT_ANY_THROW(state_manager.set_turn("8s"));
+    EXPECT_ANY_THROW(state_manager.set_river("9s"));
+    EXPECT_EQ(expected, state_manager.get_table_state());
+    EXPECT_EQ(poker_lib::game_stages::river_betting_round, state_manager.get_current_game_stage());
+
+    // Move to showdown
+    EXPECT_NO_THROW(state_manager.set_acting_player_action(poker_lib::player_action_check_or_call{}));
+    EXPECT_NO_THROW(state_manager.set_acting_player_action(poker_lib::player_action_check_or_call{}));
+    EXPECT_EQ(expected, state_manager.get_table_state());
+    EXPECT_EQ(poker_lib::game_stages::end_of_game, state_manager.get_current_game_stage());
+
+    // Showdown
+    EXPECT_NO_THROW(state_manager.set_pocket_cards(0, *expected.players.at(0).pocket_cards));
+    EXPECT_NO_THROW(state_manager.set_pocket_cards(1, *expected.players.at(1).pocket_cards));
+    EXPECT_ANY_THROW(state_manager.set_flop("Ts 9d 3c"));
+    EXPECT_ANY_THROW(state_manager.set_turn("8s"));
+    EXPECT_ANY_THROW(state_manager.set_river("9s"));
+    EXPECT_ANY_THROW(state_manager.set_acting_player_action(poker_lib::player_action_check_or_call{}));
+    EXPECT_EQ(expected, state_manager.get_table_state());
+    EXPECT_EQ(poker_lib::game_stages::end_of_game, state_manager.get_current_game_stage());
+}
+
 TEST(test_holdem_table_state_manager, full_game_4_players)
 {
     poker_lib::table_state expected{};
