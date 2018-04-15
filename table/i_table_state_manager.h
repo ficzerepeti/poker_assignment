@@ -16,6 +16,7 @@ public:
 
     virtual game_stages get_current_game_stage() const = 0;
     virtual const table_state& get_table_state() const = 0;
+    virtual const player_state& get_acting_player_state() const = 0;
 
     virtual void set_pocket_cards(size_t player_pos, const std::string &cards) = 0;
     virtual void set_flop(const std::string &card) = 0;

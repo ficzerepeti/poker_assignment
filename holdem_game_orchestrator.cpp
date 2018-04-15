@@ -56,7 +56,7 @@ void holdem_game_orchestrator::run_game()
 player_action_t holdem_game_orchestrator::get_acting_player_action()
 {
     const auto& table = _table_state_manager.get_table_state();
-    const auto& player = get_current_player(table);
+    const auto& player = _table_state_manager.get_acting_player_state();
 
     const bool is_opponent = table.acting_player_pos != _user_pos;
     if (is_opponent)
@@ -65,9 +65,9 @@ player_action_t holdem_game_orchestrator::get_acting_player_action()
     }
 
     std::ostringstream oss;
-    if (player.amount_needed_to_call != 0)
+    if (player.per_betting_state.amount_needed_to_call != 0)
     {
-        oss << "It's your turn and you need to invest " << player.amount_needed_to_call << " to call. ";
+        oss << "It's your turn and you need to invest " << player.per_betting_state.amount_needed_to_call << " to call. ";
     }
 
     const auto user_equity = calculate_user_equity(table);
@@ -84,7 +84,7 @@ double holdem_game_orchestrator::calculate_user_equity(const table_state& table)
     std::vector<std::string> hands;
     for (const auto& player : table.players)
     {
-        hands.emplace_back(player.pocket_cards.value_or("random"));
+        hands.emplace_back(player.per_game_state.pocket_cards.value_or("random"));
     }
 
     return _poker_lib.calculate_equities(hands, table.communal_cards).at(table.acting_player_pos);

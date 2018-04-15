@@ -1,13 +1,22 @@
 #include <gtest/gtest.h>
 #include "table/holdem_table_state_manager.h"
 
-TEST(test_holdem_table_state_manager, invalid_initialisation)
+TEST(test_holdem_table_state_manager, invalid_initialisations)
 {
-    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager(0, 0, 10, 20));
-    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager(1, 0, 10, 20));
-    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager(2, 2, 10, 20));
-    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager(2, 0, 20, 20));
-    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager(2, 0, 20, 10));
+    // Not enough players
+    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({}, 0, 10, 20));
+    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{100}}, 0, 10, 20));
+    // Invalid dealer pos
+    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{100}, {100}}, 2, 10, 20));
+    // Incorrect blind sizes
+    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{100}, {100}}, 0, 20, 20));
+    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{100}, {100}}, 0, 20, 10));
+    // Not enough player stack
+    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{9}, {100}}, 0, 10, 20));
+    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{20}, {19}}, 0, 10, 20));
+    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{9}, {19}}, 0, 10, 20));
+    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{100}, {100}, {9}, {100}}, 2, 10, 20));
+    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{100}, {100}, {100}, {19}}, 2, 10, 20));
 }
 
 TEST(test_holdem_table_state_manager, starting_state_heads_up_1st_player_deals)
@@ -18,8 +27,6 @@ TEST(test_holdem_table_state_manager, starting_state_heads_up_1st_player_deals)
     expected.pot = 30;
     expected.acting_player_pos = 0;
     expected.dealer_pos = 0;
-    expected.small_blind_pos = 0;
-    expected.big_blind_pos = 1;
 
     expected.players.emplace_back(poker_lib::player_state{10, false, false, std::optional<std::string>{} });
     expected.players.emplace_back(poker_lib::player_state{0, false, false, std::optional<std::string>{} });
