@@ -16,7 +16,6 @@ struct per_game_player_state
 
 struct per_betting_player_state
 {
-    uint64_t amount_needed_to_call = 0;
     bool has_acted_in_betting = false;
 };
 

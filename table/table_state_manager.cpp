@@ -62,7 +62,7 @@ void table_state_manager::elect_next_acting_player_after_betting()
     }
 }
 
-void table_state_manager::reset_players_after_betting()
+void table_state_manager::reset_per_betting_state()
 {
     for (auto &player : _table_state.players)
     {

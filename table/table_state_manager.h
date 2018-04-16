@@ -22,7 +22,7 @@ public:
     // Returns false if no player may act in this betting round meaning this round has finished. True otherwise.
     bool move_to_next_betting_player();
 
-    void reset_players_after_betting();
+    void reset_per_betting_state();
     // Sets acting player to the first active player after the dealer.
     void elect_next_acting_player_after_betting();
 

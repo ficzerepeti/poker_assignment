@@ -13,10 +13,7 @@ std::ostream& operator<<(std::ostream &os, const per_game_player_state &state)
 
 std::ostream& operator<<(std::ostream &os, const per_betting_player_state &state)
 {
-    os << "amount_needed_to_call: " << state.amount_needed_to_call
-       << ", has_acted_in_betting: " << state.has_acted_in_betting
-       << '.';
-    return os;
+    return os << "has_acted_in_betting: " << state.has_acted_in_betting;
 }
 
 std::ostream& operator<<(std::ostream &os, const player_state &state)
@@ -37,8 +34,7 @@ bool operator==(const per_game_player_state &lhs, const per_game_player_state &r
 
 bool operator==(const per_betting_player_state &lhs, const per_betting_player_state &rhs)
 {
-    return lhs.amount_needed_to_call == rhs.amount_needed_to_call &&
-           lhs.has_acted_in_betting == rhs.has_acted_in_betting;
+    return lhs.has_acted_in_betting == rhs.has_acted_in_betting;
 }
 
 bool operator==(const player_state &lhs, const player_state &rhs)

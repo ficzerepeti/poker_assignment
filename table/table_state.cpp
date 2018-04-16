@@ -23,6 +23,7 @@ bool operator==(const table_state &lhs, const table_state &rhs)
     return lhs.small_blind_size == rhs.small_blind_size &&
            lhs.big_blind_size == rhs.big_blind_size &&
            lhs.pot == rhs.pot &&
+           lhs.total_contribution_to_stay_in_game == rhs.total_contribution_to_stay_in_game &&
            lhs.communal_cards == rhs.communal_cards &&
            lhs.players == rhs.players &&
            lhs.acting_player_pos == rhs.acting_player_pos &&
@@ -34,6 +35,7 @@ std::ostream& operator<<(std::ostream &os, const table_state &state)
     return os << "small_blind_size: " << state.small_blind_size
               << ", big_blind_size: " << state.big_blind_size
               << ", pot: " << state.pot
+              << ", total_contribution_to_stay_in_game: " << state.total_contribution_to_stay_in_game
               << ", communal_cards: " << state.communal_cards
               << ", players: " << state.players
               << ", acting_player_pos: " << state.acting_player_pos

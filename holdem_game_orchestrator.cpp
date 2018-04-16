@@ -65,9 +65,10 @@ player_action_t holdem_game_orchestrator::get_acting_player_action()
     }
 
     std::ostringstream oss;
-    if (player.per_betting_state.amount_needed_to_call != 0)
+    const auto amount_to_call = table.total_contribution_to_stay_in_game - player.per_game_state.contribution_to_pot;
+    if (amount_to_call > 0)
     {
-        oss << "It's your turn and you need to invest " << player.per_betting_state.amount_needed_to_call << " to call. ";
+        oss << "It's your turn and you need to invest " << amount_to_call << " to call. ";
     }
 
     const auto user_equity = calculate_user_equity(table);

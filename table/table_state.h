@@ -15,6 +15,7 @@ struct table_state
     uint64_t big_blind_size;
 
     uint64_t pot;
+    uint64_t total_contribution_to_stay_in_game;
     std::string communal_cards;
 
     std::vector<player_state> players;
