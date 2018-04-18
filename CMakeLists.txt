@@ -18,7 +18,7 @@ set(POKER_HEADERS
     table/player_actions.h
     table/player_state.h
     table/table_state.h
-    table/table_state_manager.h)
+    )
 set(POKER_SOURCES
     holdem_game_orchestrator.cpp
     my_poker_lib.cpp
@@ -28,7 +28,7 @@ set(POKER_SOURCES
     table/player_actions.cpp
     table/player_state.cpp
     table/table_state.cpp
-    table/table_state_manager.cpp)
+    )
 
 add_library(my_poker_lib STATIC ${POKER_HEADERS} ${POKER_SOURCES})
 target_link_libraries(my_poker_lib libOMPEval)

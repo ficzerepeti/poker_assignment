@@ -5,7 +5,7 @@
 
 #include "i_table_state_manager.h"
 #include "i_my_poker_lib.h"
-#include "table_state_manager.h"
+#include "table_state.h"
 
 namespace poker_lib {
 
@@ -25,7 +25,7 @@ public:
     ~holdem_table_state_manager() override = default;
 
     game_stages get_current_game_stage() const override { return _current_stage; }
-    const table_state &get_table_state() const override { return _table_state.get_table_state(); }
+    const table_state &get_table_state() const override { return _table_state; }
     const player_state &get_acting_player_state() const override { return _table_state.get_acting_player(); }
 
     // Never throws, can set pocket cards at any stage of the game
@@ -47,7 +47,7 @@ private:
     void handle_betting_player_action(const player_action_raise &action);
 
     game_stages _current_stage;
-    table_state_manager _table_state;
+    table_state _table_state;
 };
 
 } // end of namespace poker_lib

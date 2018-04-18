@@ -43,12 +43,10 @@ holdem_table_state_manager::holdem_table_state_manager(const std::vector<initial
         throw std::invalid_argument(oss.str());
     }
 
-    auto& table = _table_state.get_table_state();
+    _table_state.small_blind_size = small_blind_size;
+    _table_state.big_blind_size = big_blind_size;
 
-    table.small_blind_size = small_blind_size;
-    table.big_blind_size = big_blind_size;
-
-    table.dealer_pos = dealer_position;
+    _table_state.dealer_pos = dealer_position;
 
     const bool is_heads_up = players.size() == 2;
 
@@ -59,11 +57,11 @@ holdem_table_state_manager::holdem_table_state_manager(const std::vector<initial
         {
             throw std::invalid_argument("All players need to have non-zero stack");
         }
-        table.players.emplace_back(player_state{ initial_state.current_stack, {}, {} });
+        _table_state.players.emplace_back(player_state{ initial_state.current_stack, {}, {} });
     }
 
     // Heads-up has special rules
-    table.acting_player_pos = is_heads_up ? dealer_position : get_next_pos(dealer_position, players.size());
+    _table_state.acting_player_pos = is_heads_up ? dealer_position : get_next_pos(dealer_position, players.size());
 
     auto &small_blind = _table_state.get_acting_player();
     if (small_blind.current_stack < small_blind_size)
@@ -92,7 +90,7 @@ holdem_table_state_manager::holdem_table_state_manager(const std::vector<initial
 
 void holdem_table_state_manager::set_pocket_cards(size_t player_pos, const std::string &cards)
 {
-    _table_state.get_player_at_pos(player_pos).per_game_state.pocket_cards = cards;
+    _table_state.players.at(player_pos).per_game_state.pocket_cards = cards;
     if (_current_stage == game_stages::deal_pocket_cards)
     {
         _current_stage = get_next_game_stage(_current_stage);
@@ -103,7 +101,7 @@ void holdem_table_state_manager::set_flop(const std::string &cards)
 {
     throw_if_unexpected_call(_current_stage, game_stages::deal_communal_cards, __func__);
 
-    _table_state.set_communal_cards(cards);
+    _table_state.communal_cards = cards;
     _current_stage = get_next_game_stage(_current_stage);
 }
 
@@ -111,10 +109,8 @@ void holdem_table_state_manager::set_turn(const std::string &card)
 {
     throw_if_unexpected_call(_current_stage, game_stages::deal_turn_card, __func__);
 
-    auto new_communal_cards = _table_state.get_table_state().communal_cards;
-    new_communal_cards += ' ';
-    new_communal_cards += card;
-    _table_state.set_communal_cards(new_communal_cards);
+    _table_state.communal_cards += ' ';
+    _table_state.communal_cards += card;
 
     _current_stage = get_next_game_stage(_current_stage);
 }
@@ -123,10 +119,8 @@ void holdem_table_state_manager::set_river(const std::string &card)
 {
     throw_if_unexpected_call(_current_stage, game_stages::deal_river_card, __func__);
 
-    auto new_communal_cards = _table_state.get_table_state().communal_cards;
-    new_communal_cards += ' ';
-    new_communal_cards += card;
-    _table_state.set_communal_cards(new_communal_cards);
+    _table_state.communal_cards += ' ';
+    _table_state.communal_cards += card;
 
     _current_stage = get_next_game_stage(_current_stage);
 }
@@ -177,12 +171,11 @@ void holdem_table_state_manager::handle_betting_player_action(const player_actio
 void holdem_table_state_manager::handle_betting_player_action(const player_action_check_or_call &action)
 {
     auto& player = _table_state.get_acting_player();
-    auto& table = _table_state.get_table_state();
 
-    const auto amount = std::min(table.total_contribution_to_stay_in_game - player.per_game_state.contribution_to_pot,
+    const auto amount = std::min(_table_state.total_contribution_to_stay_in_game - player.per_game_state.contribution_to_pot,
                                  player.current_stack);
 
-    table.pot += amount;
+    _table_state.pot += amount;
     player.current_stack -= amount;
     player.per_game_state.contribution_to_pot += amount;
 
@@ -192,9 +185,8 @@ void holdem_table_state_manager::handle_betting_player_action(const player_actio
 void holdem_table_state_manager::handle_betting_player_action(const player_action_raise &action)
 {
     auto& player = _table_state.get_acting_player();
-    auto& table = _table_state.get_table_state();
 
-    const auto amount_to_call = table.total_contribution_to_stay_in_game - player.per_game_state.contribution_to_pot;
+    const auto amount_to_call = _table_state.total_contribution_to_stay_in_game - player.per_game_state.contribution_to_pot;
 
     const bool is_really_a_raise = player.current_stack > amount_to_call;
     const auto amount_contributed = std::min(player.current_stack, amount_to_call + action.amount_raised_above_call);
@@ -203,9 +195,9 @@ void holdem_table_state_manager::handle_betting_player_action(const player_actio
     if (is_really_a_raise)
     {
         const auto raised_amount = amount_contributed - amount_to_call;
-        table.total_contribution_to_stay_in_game += raised_amount;
+        _table_state.total_contribution_to_stay_in_game += raised_amount;
 
-        for (auto& a_player : _table_state.get_table_state().players)
+        for (auto& a_player : _table_state.players)
         {
             if (!a_player.has_folded())
             {
@@ -215,7 +207,7 @@ void holdem_table_state_manager::handle_betting_player_action(const player_actio
     }
     player.per_betting_state.has_acted_in_betting = true;
 
-    table.pot += amount_contributed;
+    _table_state.pot += amount_contributed;
     player.current_stack -= amount_contributed;
     player.per_game_state.contribution_to_pot += amount_contributed;
 }
