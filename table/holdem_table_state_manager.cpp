@@ -205,11 +205,11 @@ void holdem_table_state_manager::handle_betting_player_action(const player_actio
         const auto raised_amount = amount_contributed - amount_to_call;
         table.total_contribution_to_stay_in_game += raised_amount;
 
-        for (player_state& a_player : _table_state.get_table_state().players)
+        for (auto& a_player : _table_state.get_table_state().players)
         {
             if (!a_player.has_folded())
             {
-                a_player.per_betting_state.has_acted_in_betting = false;
+                a_player.per_betting_state.has_acted_in_betting = {};
             }
         }
     }
