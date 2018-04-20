@@ -27,6 +27,7 @@ struct table_state
     // Methods
     player_state& get_acting_player();
     const player_state& get_acting_player() const;
+    uint64_t get_acting_player_amount_to_call() const;
 
     // Number of players that haven't folded so far
     size_t get_active_player_count() const;

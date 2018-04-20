@@ -6,6 +6,20 @@
 
 namespace poker_lib {
 
+static std::string table_state_and_stage_to_user_message(const table_state& state, const game_stages stage)
+{
+    std::ostringstream oss;
+    oss << "Current stage is " << stage
+        << ", pot=" << state.pot
+        << ", big blind size: " << state.big_blind_size
+        << ", communal cards: " << state.communal_cards << std::endl
+        << "total_contribution_to_stay_in_game: " << state.total_contribution_to_stay_in_game
+        << ", amount needed to call: " << state.get_acting_player_amount_to_call() << std::endl
+        << "acting player state: " << state.get_acting_player();
+
+    return oss.str();
+}
+
 holdem_game_orchestrator::holdem_game_orchestrator(i_my_poker_lib& poker_lib,
                                                    i_user_interaction &user_interaction,
                                                    i_table_state_manager &table_state_manager,
@@ -22,7 +36,7 @@ void holdem_game_orchestrator::run_game()
 {
     while (true)
     {
-        switch (_table_state_manager.get_current_game_stage())
+        switch (const auto current_stage = _table_state_manager.get_current_game_stage())
         {
         case game_stages::deal_pocket_cards:
             _table_state_manager.set_pocket_cards(_user_pos, _user_interaction.get_pocket_cards());
@@ -44,10 +58,13 @@ void holdem_game_orchestrator::run_game()
         case game_stages::flop_betting_round:
         case game_stages::turn_betting_round:
         case game_stages::river_betting_round:
+            _user_interaction.notify_player(table_state_and_stage_to_user_message(_table_state_manager.get_table_state(),
+                                                                                  current_stage));
             _table_state_manager.set_acting_player_action(get_acting_player_action());
             break;
 
         case game_stages::end_of_game:
+            _user_interaction.notify_player("End of game has been reached."); // TODO: print out winner
             return;
         }
     }
@@ -56,7 +73,6 @@ void holdem_game_orchestrator::run_game()
 player_action_t holdem_game_orchestrator::get_acting_player_action()
 {
     const auto& table = _table_state_manager.get_table_state();
-    const auto& player = _table_state_manager.get_acting_player_state();
 
     const bool is_opponent = table.acting_player_pos != _user_pos;
     if (is_opponent)
@@ -64,15 +80,9 @@ player_action_t holdem_game_orchestrator::get_acting_player_action()
         return _user_interaction.get_opponent_action(table.acting_player_pos);
     }
 
-    std::ostringstream oss;
-    const auto amount_to_call = table.total_contribution_to_stay_in_game - player.per_game_state.contribution_to_pot;
-    if (amount_to_call > 0)
-    {
-        oss << "It's your turn and you need to invest " << amount_to_call << " to call. ";
-    }
-
     const auto user_equity = calculate_user_equity(table);
 
+    std::ostringstream oss;
     oss << "Your equity of winning is " << (user_equity * 100) << '%' << std::endl;
     _user_interaction.notify_player(oss.str());
 

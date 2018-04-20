@@ -75,6 +75,14 @@ void table_state::reset_per_betting_state()
     }
 }
 
+uint64_t table_state::get_acting_player_amount_to_call() const
+{
+    const auto &player = get_acting_player();
+    const auto amount_to_call = total_contribution_to_stay_in_game - player.per_game_state.contribution_to_pot;
+
+    return amount_to_call;
+}
+
 bool operator==(const table_state &lhs, const table_state &rhs)
 {
     return lhs.small_blind_size == rhs.small_blind_size &&

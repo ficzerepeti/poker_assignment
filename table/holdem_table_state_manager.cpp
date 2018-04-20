@@ -186,7 +186,7 @@ void holdem_table_state_manager::handle_betting_player_action(const player_actio
 {
     auto& player = _table_state.get_acting_player();
 
-    const auto amount_to_call = _table_state.total_contribution_to_stay_in_game - player.per_game_state.contribution_to_pot;
+    const auto amount_to_call = _table_state.get_acting_player_amount_to_call();
 
     const bool is_really_a_raise = player.current_stack > amount_to_call;
     const auto amount_contributed = std::min(player.current_stack, amount_to_call + action.amount_raised_above_call);
