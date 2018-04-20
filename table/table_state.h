@@ -12,6 +12,8 @@ namespace poker_lib {
 struct table_state
 {
     // Fields
+    game_stages current_stage;
+
     uint64_t small_blind_size;
     uint64_t big_blind_size;
 
@@ -27,7 +29,10 @@ struct table_state
     // Methods
     player_state& get_acting_player();
     const player_state& get_acting_player() const;
-    uint64_t get_acting_player_amount_to_call() const;
+    uint64_t get_player_amount_to_call(size_t player_pos) const;
+    uint64_t get_acting_player_amount_to_call() const { return get_player_amount_to_call(acting_player_pos); }
+
+    bool may_act_in_betting_round(size_t player_pos) const;
 
     // Number of players that haven't folded so far
     size_t get_active_player_count() const;
@@ -35,7 +40,6 @@ struct table_state
     // Returns false if no player may act in this betting round meaning this round has finished. True otherwise.
     bool move_to_next_betting_player();
 
-    void reset_per_betting_state();
     // Sets acting player to the first active player after the dealer.
     void elect_next_acting_player_after_betting();
 };

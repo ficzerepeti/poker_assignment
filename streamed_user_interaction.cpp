@@ -1,27 +1,6 @@
 #include <string>
+#include <sstream>
 #include "streamed_user_interaction.h"
-
-enum class player_action_type
-{
-    fold,
-    check,
-    call,
-    raise,
-    unknown
-};
-std::istream& operator>>(std::istream& is, player_action_type& type)
-{
-    std::string str;
-    is >> str;
-
-    if (str == "fold") { type = player_action_type::fold; }
-    else if (str == "check") { type = player_action_type::check; }
-    else if (str == "call") { type = player_action_type::call; }
-    else if (str == "raise") { type = player_action_type::raise; }
-    else { type = player_action_type::unknown; }
-
-    return is;
-}
 
 namespace poker_lib {
 
@@ -34,26 +13,37 @@ streamed_user_interaction::streamed_user_interaction(std::ostream &os, std::istr
 
 std::string streamed_user_interaction::get_pocket_cards()
 {
-    return "Ac Ad";
+    _os << "What pocket cards have you been dealt?\n";
+    std::string cards;
+    getline(_is, cards);
+    return cards;
 }
 
 std::string streamed_user_interaction::get_flop()
 {
-    return "Ah As 3c";
+    _os << "What is the flop?\n";
+    std::string cards;
+    getline(_is, cards);
+    return cards;
 }
 
 std::string streamed_user_interaction::get_turn()
 {
-    return "4d";
+    _os << "What is the turn?\n";
+    std::string card;
+    getline(_is, card);
+    return card;
 }
 
 std::string streamed_user_interaction::get_river()
 {
-    return "5h";
+    _os << "What is the river?\n";
+    std::string card;
+    getline(_is, card);
+    return card;
 }
 
-player_action_t streamed_user_interaction::get_user_action(size_t position,
-                                                                                      const player_action_t &recommended_action)
+player_action_t streamed_user_interaction::get_user_action(const player_action_t &recommended_action)
 {
     _os << "Your recommended action is ";
     std::visit([&](const auto &obj){ _os << obj; }, recommended_action);
@@ -62,67 +52,47 @@ player_action_t streamed_user_interaction::get_user_action(size_t position,
     return read_player_action();
 }
 
-player_action_t streamed_user_interaction::get_opponent_action(size_t position)
+player_action_t streamed_user_interaction::get_opponent_action()
 {
-    _os << "What did user at position " << position << " do?" << std::endl;
+    _os << "What did your opponent do?" << std::endl;
     return read_player_action();
 }
 
 player_action_t streamed_user_interaction::read_player_action()
 {
     _os << "Please specify an action: fold, check, call, raise <value>" << std::endl;
-    auto type = player_action_type::unknown;
-    bool first_read = true;
-    while (type == player_action_type::unknown)
+
+    std::string action;
+
+    while (true)
     {
-        if (!first_read)
+        _is.clear();
+        _is.ignore(std::numeric_limits<size_t>::max());
+
+        _is >> action;
+
+        if (action == "fold")
         {
-            _os << "Invalid input. Please specify either fold, check, call or raise" << std::endl;
+            return player_action_fold{};
         }
-        first_read = false;
-        _is >> type;
+        if (action == "check" || action == "call")
+        {
+            return player_action_check_or_call{};
+        }
+        if (action == "raise")
+        {
+            uint64_t amount = 0;
+            _is >> amount;
+            return player_action_raise{amount};
+        }
+
+        _os << "Invalid input. Please specify either fold, check, call or raise" << std::endl;
     }
-    switch (type)
-    {
-    case player_action_type::fold:
-        return player_action_fold{};
-
-    case player_action_type::check:
-    case player_action_type::call:
-        return player_action_check_or_call{};
-
-    case player_action_type::raise:
-        return player_action_raise{read_amount()};
-
-    case player_action_type::unknown:
-        break;
-    }
-
-    throw std::logic_error("Reached unreachable code in get_user_action");
 }
 
 void streamed_user_interaction::notify_player(const std::string &message)
 {
     _os << message << std::endl;
-}
-
-uint64_t streamed_user_interaction::read_amount()
-{
-    _os << "Please specify the amount" << std::endl;
-    std::string str;
-
-    while (true)
-    {
-        try
-        {
-            _is >> str;
-            return std::stoull(str);
-        }
-        catch (const std::exception&)
-        {
-            _os << "Please enter a number, no other characters" << std::endl;
-        }
-    }
 }
 
 } // end of namespace poker_lib

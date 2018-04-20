@@ -18,5 +18,8 @@ using player_action_t = std::variant<player_action_fold, player_action_check_or_
 std::ostream& operator<<(std::ostream& os, const player_action_fold& obj);
 std::ostream& operator<<(std::ostream& os, const player_action_check_or_call& obj);
 std::ostream& operator<<(std::ostream& os, const player_action_raise& obj);
+constexpr bool operator==(const player_action_fold& lhs, const player_action_fold& rhs) { return true; }
+constexpr bool operator==(const player_action_check_or_call& lhs, const player_action_check_or_call& rhs) { return true; }
+bool operator==(const player_action_raise& lhs, const player_action_raise& rhs);
 
 } // end of namespace poker_lib

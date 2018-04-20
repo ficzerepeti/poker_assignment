@@ -4,6 +4,10 @@
 #include <optional>
 #include <string>
 #include <ostream>
+#include <vector>
+
+#include "game_stages.h"
+#include "player_actions.h"
 
 namespace poker_lib {
 
@@ -16,7 +20,10 @@ struct per_game_player_state
 
 struct per_betting_player_state
 {
-    bool has_acted_in_betting = false;
+    std::vector<player_action_t> pre_flop_bets;
+    std::vector<player_action_t> flop_bets;
+    std::vector<player_action_t> turn_bets;
+    std::vector<player_action_t> river_bets;
 };
 
 struct player_state
@@ -28,10 +35,8 @@ struct player_state
 
     bool is_all_in() const { return current_stack == 0 && !per_game_state.has_folded; }
     bool has_folded() const { return per_game_state.has_folded; }
-    bool may_act_in_this_betting_round() const { return !per_game_state.has_folded
-                                                     && !per_betting_state.has_acted_in_betting
-                                                     && current_stack > 0; }
-
+    std::vector<player_action_t>& get_actions(game_stages stage);
+    const std::vector<player_action_t>& get_actions(game_stages stage) const;
 };
 
 std::ostream &operator<<(std::ostream &os, const per_game_player_state &state);

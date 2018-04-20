@@ -14,7 +14,6 @@ class i_table_state_manager
 public:
     virtual ~i_table_state_manager() = default;
 
-    virtual game_stages get_current_game_stage() const = 0;
     virtual const table_state& get_table_state() const = 0;
     virtual const player_state& get_acting_player_state() const = 0;
 

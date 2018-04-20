@@ -18,14 +18,13 @@ public:
     std::string get_turn() override;
     std::string get_river() override;
 
-    player_action_t get_user_action(size_t position, const player_action_t &recommended_action) override;
-    player_action_t get_opponent_action(size_t position) override;
+    player_action_t get_user_action(const player_action_t &recommended_action) override;
+    player_action_t get_opponent_action() override;
 
     void notify_player(const std::string &message) override;
 
 private:
     player_action_t read_player_action();
-    uint64_t read_amount();
 
     std::ostream& _os;
     std::istream& _is;

@@ -17,8 +17,7 @@ set(POKER_HEADERS
     table/i_table_state_manager.h
     table/player_actions.h
     table/player_state.h
-    table/table_state.h
-    )
+    table/table_state.h)
 set(POKER_SOURCES
     holdem_game_orchestrator.cpp
     my_poker_lib.cpp
@@ -27,8 +26,7 @@ set(POKER_SOURCES
     table/holdem_table_state_manager.cpp
     table/player_actions.cpp
     table/player_state.cpp
-    table/table_state.cpp
-    )
+    table/table_state.cpp)
 
 add_library(my_poker_lib STATIC ${POKER_HEADERS} ${POKER_SOURCES})
 target_link_libraries(my_poker_lib libOMPEval)
@@ -48,4 +46,4 @@ add_executable(texas_holdem_game main_holdem_game.cpp)
 target_link_libraries(texas_holdem_game my_poker_lib)
 
 add_executable(tests unit_tests/test_table.cpp)
-target_link_libraries(tests gtest_main my_poker_lib) # gmock_main
+target_link_libraries(tests gtest gmock_main my_poker_lib)

@@ -22,6 +22,7 @@ public:
 private:
     player_action_t get_acting_player_action();
     double calculate_user_equity(const table_state& table) const;
+    std::string table_state_and_stage_to_user_message() const;
 
     i_my_poker_lib& _poker_lib;
     i_user_interaction& _user_interaction;

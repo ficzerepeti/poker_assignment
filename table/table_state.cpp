@@ -1,5 +1,6 @@
 #include <algorithm>
 #include "table_state.h"
+#include "game_stages.h"
 
 namespace std {
 
@@ -41,7 +42,7 @@ bool table_state::move_to_next_betting_player()
          pos != pos_has_just_acted;
          pos = get_next_pos(pos, players.size()))
     {
-        if (players.at(pos).may_act_in_this_betting_round())
+        if (may_act_in_betting_round(pos))
         {
             acting_player_pos = pos;
             return true;
@@ -67,25 +68,31 @@ void table_state::elect_next_acting_player_after_betting()
     }
 }
 
-void table_state::reset_per_betting_state()
+uint64_t table_state::get_player_amount_to_call(size_t player_pos) const
 {
-    for (auto &player : players)
-    {
-        player.per_betting_state = {};
-    }
-}
-
-uint64_t table_state::get_acting_player_amount_to_call() const
-{
-    const auto &player = get_acting_player();
+    const auto &player = players.at(player_pos);
     const auto amount_to_call = total_contribution_to_stay_in_game - player.per_game_state.contribution_to_pot;
 
     return amount_to_call;
 }
 
+bool table_state::may_act_in_betting_round(size_t player_pos) const
+{
+    const auto& player = players.at(player_pos);
+    if (player.has_folded() || player.is_all_in())
+    {
+        return false;
+    }
+
+    const bool has_taken_no_action = player.get_actions(current_stage).empty();
+    const bool need_to_contribute_to_stay_in = get_player_amount_to_call(player_pos) > 0;
+    return has_taken_no_action || need_to_contribute_to_stay_in;
+}
+
 bool operator==(const table_state &lhs, const table_state &rhs)
 {
-    return lhs.small_blind_size == rhs.small_blind_size &&
+    return lhs.current_stage == rhs.current_stage &&
+           lhs.small_blind_size == rhs.small_blind_size &&
            lhs.big_blind_size == rhs.big_blind_size &&
            lhs.pot == rhs.pot &&
            lhs.total_contribution_to_stay_in_game == rhs.total_contribution_to_stay_in_game &&
@@ -97,7 +104,8 @@ bool operator==(const table_state &lhs, const table_state &rhs)
 
 std::ostream& operator<<(std::ostream &os, const table_state &state)
 {
-    return os << "small_blind_size: " << state.small_blind_size
+    return os << ", current_stage: " << state.current_stage
+              << ", small_blind_size: " << state.small_blind_size
               << ", big_blind_size: " << state.big_blind_size
               << ", pot: " << state.pot
               << ", total_contribution_to_stay_in_game: " << state.total_contribution_to_stay_in_game

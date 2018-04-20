@@ -24,7 +24,6 @@ public:
 
     ~holdem_table_state_manager() override = default;
 
-    game_stages get_current_game_stage() const override { return _current_stage; }
     const table_state &get_table_state() const override { return _table_state; }
     const player_state &get_acting_player_state() const override { return _table_state.get_acting_player(); }
 
@@ -46,7 +45,6 @@ private:
     void handle_betting_player_action(const player_action_check_or_call &action);
     void handle_betting_player_action(const player_action_raise &action);
 
-    game_stages _current_stage;
     table_state _table_state;
 };
 
