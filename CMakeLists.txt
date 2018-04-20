@@ -34,7 +34,9 @@ add_library(my_poker_lib STATIC ${POKER_HEADERS} ${POKER_SOURCES})
 target_link_libraries(my_poker_lib libOMPEval)
 target_include_directories(my_poker_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-if (NOT MSVC)
+if (MSVC)
+    target_compile_definitions(my_poker_lib PUBLIC "-DNOMINMAX")
+else()
     target_compile_options(my_poker_lib
         PUBLIC "-Wall"
         PUBLIC "-Wextra"
@@ -46,4 +48,4 @@ add_executable(texas_holdem_game main_holdem_game.cpp)
 target_link_libraries(texas_holdem_game my_poker_lib)
 
 add_executable(tests unit_tests/test_table.cpp)
-target_link_libraries(tests gtest_main gmock_main my_poker_lib)
+target_link_libraries(tests gtest_main my_poker_lib) # gmock_main

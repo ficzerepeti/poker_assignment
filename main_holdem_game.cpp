@@ -9,7 +9,7 @@ int main()
 {
     poker_lib::my_poker_lib poker_lib;
     poker_lib::streamed_user_interaction user_interaction(std::cout, std::cin);
-    poker_lib::holdem_table_state_manager state_manager(3, 0, 10, 20);
+    poker_lib::holdem_table_state_manager state_manager({{200}, {200}, {200}}, 0, 10, 20);
 
     poker_lib::holdem_game_orchestrator game(poker_lib, user_interaction, state_manager, 2);
 
