@@ -27,19 +27,19 @@ void holdem_game_orchestrator::run_game()
         switch (_table_state_manager.get_table_state().current_stage)
         {
         case game_stages::deal_pocket_cards:
-            _table_state_manager.set_pocket_cards(_user_pos, _user_interaction.get_pocket_cards());
+            _table_state_manager.set_pocket_cards(_user_pos, read_valid_cards([this](){ return _user_interaction.get_pocket_cards(); }, 2));
             break;
 
         case game_stages::deal_communal_cards:
-            _table_state_manager.set_flop(_user_interaction.get_flop());
+            _table_state_manager.set_flop(read_valid_cards([this](){ return _user_interaction.get_flop(); }, 3));
             break;
 
         case game_stages::deal_turn_card:
-            _table_state_manager.set_turn(_user_interaction.get_turn());
+            _table_state_manager.set_turn(read_valid_cards([this](){ return _user_interaction.get_turn(); }, 1));
             break;
 
         case game_stages::deal_river_card:
-            _table_state_manager.set_river(_user_interaction.get_river());
+            _table_state_manager.set_river(read_valid_cards([this](){ return _user_interaction.get_river(); }, 1));
             break;
 
         case game_stages::pre_flop_betting_round:

@@ -10,7 +10,8 @@ class i_my_poker_lib
 public:
     virtual ~i_my_poker_lib() = default;
 
-    virtual bool is_valid_card_str(const std::string& cards) = 0;
+    virtual bool validate_cards(const std::string &cards, size_t num_of_expected_cards) const = 0;
+
     virtual std::vector<double> calculate_equities(const std::vector<std::string> &hands, const std::string &board) = 0;
     virtual double calculate_pot_percentage(uint64_t pot, uint64_t raise) = 0;
     virtual uint64_t calculate_optimal_bet_size(uint64_t stack, uint64_t pot, double equity, size_t num_of_players) = 0;
