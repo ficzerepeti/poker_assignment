@@ -1,6 +1,14 @@
+#include <cctype>
 #include <string>
 #include <sstream>
 #include "streamed_user_interaction.h"
+
+static void clear_input(std::istream& is)
+{
+    is.clear();
+    is.ignore(std::numeric_limits<size_t>::max(), '\n');
+    is.ignore(std::numeric_limits<size_t>::max());
+}
 
 namespace poker_lib {
 
@@ -15,6 +23,7 @@ std::string streamed_user_interaction::get_pocket_cards()
 {
     _os << "What pocket cards have you been dealt?\n";
     std::string cards;
+    clear_input(_is);
     getline(_is, cards);
     return cards;
 }
@@ -23,6 +32,7 @@ std::string streamed_user_interaction::get_flop()
 {
     _os << "What is the flop?\n";
     std::string cards;
+    clear_input(_is);
     getline(_is, cards);
     return cards;
 }
@@ -31,6 +41,7 @@ std::string streamed_user_interaction::get_turn()
 {
     _os << "What is the turn?\n";
     std::string card;
+    clear_input(_is);
     getline(_is, card);
     return card;
 }
@@ -39,6 +50,7 @@ std::string streamed_user_interaction::get_river()
 {
     _os << "What is the river?\n";
     std::string card;
+    clear_input(_is);
     getline(_is, card);
     return card;
 }
@@ -47,14 +59,14 @@ player_action_t streamed_user_interaction::get_user_action(const player_action_t
 {
     _os << "Your recommended action is ";
     std::visit([&](const auto &obj){ _os << obj; }, recommended_action);
-    _os << std::endl;
+    _os << ' ';
 
     return read_player_action();
 }
 
 player_action_t streamed_user_interaction::get_opponent_action()
 {
-    _os << "What did your opponent do?" << std::endl;
+    _os << "What did your opponent do? ";
     return read_player_action();
 }
 
@@ -66,10 +78,12 @@ player_action_t streamed_user_interaction::read_player_action()
 
     while (true)
     {
-        _is.clear();
-        _is.ignore(std::numeric_limits<size_t>::max());
-
+        clear_input(_is);
         _is >> action;
+        for (auto& c : action)
+        {
+            c = std::tolower(c);
+        }
 
         if (action == "fold")
         {

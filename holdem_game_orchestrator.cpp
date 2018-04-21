@@ -55,7 +55,7 @@ void holdem_game_orchestrator::run_game()
             return;
         }
 
-        _user_interaction.notify_player("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+        _user_interaction.notify_player("\n\n\n\n\n\n");
     }
 }
 
@@ -95,6 +95,7 @@ std::string holdem_game_orchestrator::table_state_and_stage_to_user_message() co
     const auto& table = _table_state_manager.get_table_state();
 
     std::ostringstream oss;
+    oss << std::left;
     oss << table.current_stage << ": pot size: " << table.pot;
     if (!table.communal_cards.empty())
     {
@@ -102,7 +103,7 @@ std::string holdem_game_orchestrator::table_state_and_stage_to_user_message() co
     }
     oss << ", big blind size: " << table.big_blind_size;
 
-    constexpr std::array<int, 3> text_width{25, 10, 10};
+    constexpr std::array<int, 3> text_width{25, 20, 40};
     oss << std::endl << std::setw(text_width.at(0)) << " "
                      << std::setw(text_width.at(1)) << "stack size"
                      << std::setw(text_width.at(2)) << "action";
@@ -113,7 +114,7 @@ std::string holdem_game_orchestrator::table_state_and_stage_to_user_message() co
         const auto& player = table.players.at(pos);
 
         std::string attributes;
-        if (table.acting_player_pos == pos) { attributes += "acting, "; }
+        if (table.acting_player_pos == pos) { attributes += "*** acting, "; }
         if (table.dealer_pos == pos) { attributes += "dealer, "; }
         if (_user_pos == pos) { attributes += "you"; }
         if (player.per_game_state.has_folded) { attributes = "folded"; }
@@ -132,16 +133,16 @@ std::string holdem_game_orchestrator::table_state_and_stage_to_user_message() co
         oss << std::setw(text_width.at(2));
         if (const auto amount_to_call = table.get_player_amount_to_call(pos); amount_to_call > 0)
         {
-            oss << "amount needed to call:" << amount_to_call;
+            oss << ("amount needed to call: " + std::to_string(amount_to_call));
         }
         else if (const auto& actions = player.get_actions(table.current_stage); !actions.empty())
         {
-            std::visit([&oss](const auto& action){ oss << action; }, actions.back());
+            // To get positioning and width correct
+            std::ostringstream oss2;
+            std::visit([&oss2](const auto& action){ oss2 << action; }, actions.back());
+            oss << oss2.str();
         }
     }
-
-    oss << "\namount needed to call: " << table.get_acting_player_amount_to_call()
-        << "\nacting player state: " << table.get_acting_player();
 
     return oss.str();
 }
