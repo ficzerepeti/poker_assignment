@@ -9,7 +9,7 @@ class my_poker_lib : public i_my_poker_lib
 public:
     ~my_poker_lib() override = default;
 
-    bool validate_cards(const std::string &cards, size_t num_of_expected_cards) const override;
+    size_t get_num_of_parsed_cards(const std::string &cards) const override;
 
     std::vector<double> calculate_equities(const std::vector<std::string> &hands, const std::string &board) override;
     double calculate_pot_percentage(uint64_t pot, uint64_t raise) override;

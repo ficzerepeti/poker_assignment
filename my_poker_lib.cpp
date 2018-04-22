@@ -5,9 +5,9 @@
 
 namespace poker_lib {
 
-bool my_poker_lib::validate_cards(const std::string &cards, const size_t num_of_expected_cards) const
+size_t my_poker_lib::get_num_of_parsed_cards(const std::string &cards) const
 {
-    return omp::bitCount(omp::CardRange::getCardMask(cards)) == num_of_expected_cards;
+    return omp::bitCount(omp::CardRange::getCardMask(cards));
 }
 
 std::vector<double> my_poker_lib::calculate_equities(const std::vector<std::string> &hands, const std::string &board)

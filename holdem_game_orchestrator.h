@@ -28,15 +28,24 @@ private:
     std::string read_valid_cards(FuncT get_cards, const size_t expected_num_of_cards)
     {
         std::string cards;
+
+        const auto& current_board = _table_state_manager.get_table_state().communal_cards;
+        const auto board_cards_count = _poker_lib.get_num_of_parsed_cards(current_board);
         while (true)
         {
             cards = get_cards();
-            if (_poker_lib.validate_cards(cards, expected_num_of_cards))
+            if (_poker_lib.get_num_of_parsed_cards(cards) != expected_num_of_cards)
             {
-                // TODO: check cards are not already dealt out to someone
+                _user_interaction.notify_player("Cannot parse card(s), please try again");
+            }
+            else if (_poker_lib.get_num_of_parsed_cards(cards) != (board_cards_count + expected_num_of_cards))
+            {
+                _user_interaction.notify_player("At least one of the cards is already on the board");
+            }
+            else
+            {
                 return cards;
             }
-            _user_interaction.notify_player("Cannot parse card(s), please try again");
         }
     }
 
