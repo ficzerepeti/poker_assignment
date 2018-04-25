@@ -12,7 +12,10 @@ public:
     size_t get_num_of_parsed_cards(const std::string &cards) const override;
 
     std::vector<double> calculate_equities(const std::vector<std::string> &hands, const std::string &board) override;
-    double calculate_pot_percentage(uint64_t pot, uint64_t raise) override;
+    double calculate_expected_value(const table_state &table, double equity, size_t player_pos) const override;
+    double calculate_acting_player_expected_value(const table_state &table, double equity) const override;
+
+    double calculate_pot_equity(uint64_t pot, uint64_t increment) override;
     uint64_t calculate_optimal_bet_size(uint64_t stack, uint64_t pot, double equity, size_t num_of_players) override;
 };
 

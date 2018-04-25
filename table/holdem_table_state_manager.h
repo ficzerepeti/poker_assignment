@@ -6,13 +6,9 @@
 #include "i_table_state_manager.h"
 #include "i_my_poker_lib.h"
 #include "table_state.h"
+#include "initial_player_state.h"
 
 namespace poker_lib {
-
-struct initial_player_state
-{
-    uint64_t current_stack = 0;
-};
 
 class holdem_table_state_manager : public i_table_state_manager
 {

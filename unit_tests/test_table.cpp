@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "table/holdem_table_state_manager.h"
+#include "table/initial_player_state.h"
 
 void contribute_to_pot(poker_lib::table_state &expected, const size_t player_pos, const uint64_t amount)
 {
@@ -326,7 +327,7 @@ TEST(test_holdem_table_state_manager, full_game_4_players)
     expected.players.emplace_back(poker_lib::player_state{5000, {}, {} });
     expected.players.emplace_back(poker_lib::player_state{4990, {false, {}, 10}, {} });
 
-    poker_lib::holdem_table_state_manager state_manager(std::vector<poker_lib::initial_player_state>(4, {5000}),
+    poker_lib::holdem_table_state_manager state_manager(std::vector<initial_player_state>(4, {5000}),
                                                         expected.dealer_pos,
                                                         expected.small_blind_size,
                                                         expected.big_blind_size);

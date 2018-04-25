@@ -15,6 +15,7 @@ set(POKER_HEADERS
     table/game_stages.h
     table/holdem_table_state_manager.h
     table/i_table_state_manager.h
+    table/initial_player_state.h
     table/player_actions.h
     table/player_state.h
     table/table_state.h)

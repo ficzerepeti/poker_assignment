@@ -58,7 +58,7 @@ holdem_table_state_manager::holdem_table_state_manager(const std::vector<initial
         {
             throw std::invalid_argument("All players need to have non-zero stack");
         }
-        _table_state.players.emplace_back(player_state{ initial_state.current_stack, {}, {} });
+        _table_state.players.emplace_back(player_state{ initial_state.current_stack, {}, {}, initial_state.player_name });
     }
 
     // Heads-up has special rules

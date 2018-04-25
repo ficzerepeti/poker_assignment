@@ -70,9 +70,10 @@ player_action_t holdem_game_orchestrator::get_acting_player_action()
     }
 
     const auto user_equity = calculate_user_equity(table);
+    const auto pot_equity = _poker_lib.calculate_pot_equity(table.pot, table.get_acting_player_amount_to_call());
 
     std::ostringstream oss;
-    oss << "Your equity of winning is " << (user_equity * 100) << '%' << std::endl;
+    oss << "Your equity of winning is " << user_equity << "% and your pot odds is " << pot_equity << '%' << std::endl;
     _user_interaction.notify_player(oss.str());
 
     const auto recommended_action = player_action_check_or_call{}; // TODO
@@ -87,7 +88,7 @@ double holdem_game_orchestrator::calculate_user_equity(const table_state& table)
         hands.emplace_back(player.per_game_state.pocket_cards.value_or("random"));
     }
 
-    return _poker_lib.calculate_equities(hands, table.communal_cards).at(table.acting_player_pos);
+    return _poker_lib.calculate_equities(hands, table.communal_cards).at(table.acting_player_pos) * 100;
 }
 
 std::string holdem_game_orchestrator::table_state_and_stage_to_user_message() const
@@ -113,11 +114,10 @@ std::string holdem_game_orchestrator::table_state_and_stage_to_user_message() co
 
         const auto& player = table.players.at(pos);
 
-        std::string attributes;
+        std::string attributes(player.player_name + ' ');
         if (table.acting_player_pos == pos) { attributes += "*** acting, "; }
         if (table.dealer_pos == pos) { attributes += "dealer, "; }
-        if (_user_pos == pos) { attributes += "you"; }
-        if (player.per_game_state.has_folded) { attributes = "folded"; }
+        if (player.per_game_state.has_folded) { attributes += "folded"; }
 
         oss << std::setw(text_width.at(0)) << attributes;
         oss << std::setw(text_width.at(1));

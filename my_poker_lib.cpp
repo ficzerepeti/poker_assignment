@@ -33,11 +33,9 @@ std::vector<double> my_poker_lib::calculate_equities(const std::vector<std::stri
     return {result.equity, result.equity + hands.size()};
 }
 
-double my_poker_lib::calculate_pot_percentage(uint64_t pot, uint64_t raise)
+double my_poker_lib::calculate_pot_equity(uint64_t pot, uint64_t increment)
 {
-    const auto pot_d = static_cast<double>(pot);
-    const auto raise_d = static_cast<double>(raise);
-    return raise_d / (pot_d + raise_d);
+    return 100 * static_cast<double>(increment) / static_cast<double>(pot + increment);
 }
 
 uint64_t my_poker_lib::calculate_optimal_bet_size(uint64_t stack, uint64_t pot, double equity, size_t num_of_players)
@@ -50,6 +48,17 @@ uint64_t my_poker_lib::calculate_optimal_bet_size(uint64_t stack, uint64_t pot, 
     }
 
     return pot / 2; // TODO
+}
+
+double my_poker_lib::calculate_expected_value(const table_state &table, double equity, size_t player_pos) const
+{
+    const auto amount_to_call = table.get_player_amount_to_call(player_pos);
+    return (table.pot * equity) - (1 - equity) * amount_to_call;
+}
+
+double my_poker_lib::calculate_acting_player_expected_value(const table_state &table, double equity) const
+{
+    return calculate_expected_value(table, equity, table.acting_player_pos);
 }
 
 } // end of namespace poker_lib
