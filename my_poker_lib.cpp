@@ -10,21 +10,50 @@ size_t my_poker_lib::get_num_of_parsed_cards(const std::string &cards) const
     return omp::bitCount(omp::CardRange::getCardMask(cards));
 }
 
-std::vector<double> my_poker_lib::calculate_equities(const std::vector<std::string> &hands, const std::string &board)
+player_analysis my_poker_lib::make_acting_player_analysis(const table_state &table)
 {
-    if (hands.size() > omp::MAX_PLAYERS)
+    player_analysis analysis;
+
+    analysis.equity = calculate_equities(table).at(table.acting_player_pos) * 100;
+    analysis.pot_equity = calculate_pot_equity(table.pot, table.get_acting_player_amount_to_call());
+
+    if (analysis.pot_equity > analysis.equity)
+    {
+        analysis.recommended_action = player_action_fold{};
+    }
+    else if (analysis.equity - analysis.pot_equity > 10)
+    {
+        analysis.recommended_action = player_action_raise{table.pot * 2 / 3}; // TODO
+    }
+    else
+    {
+        analysis.recommended_action = player_action_check_or_call{};
+    }
+
+    return analysis;
+}
+
+std::vector<double> my_poker_lib::calculate_equities(const table_state &table)
+{
+    if (table.players.size() > omp::MAX_PLAYERS)
     {
         std::ostringstream oss;
-        oss << __func__ << ": requested calculation with " << hands.size()
+        oss << __func__ << ": requested calculation with " << table.players.size()
             << " but at most " << omp::MAX_PLAYERS << " are supported";
 
         throw std::invalid_argument(oss.str());
     }
 
+    std::vector<omp::CardRange> hands;
+    for (const auto &player : table.players)
+    {
+        hands.emplace_back(player.per_game_state.pocket_cards.value_or("random"));
+    }
+
     omp::EquityCalculator eq;
 
     eq.start(std::vector<omp::CardRange>{hands.begin(), hands.end()},
-             omp::CardRange::getCardMask(board),
+             omp::CardRange::getCardMask(table.communal_cards),
              omp::CardRange::getCardMask(""),
              false);
     eq.wait();

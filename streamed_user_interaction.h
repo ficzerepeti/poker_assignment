@@ -18,7 +18,7 @@ public:
     std::string get_turn() override;
     std::string get_river() override;
 
-    player_action_t get_user_action(const player_action_t &recommended_action) override;
+    player_action_t get_user_action() override;
     player_action_t get_opponent_action() override;
 
     void notify_player(const std::string &message) override;

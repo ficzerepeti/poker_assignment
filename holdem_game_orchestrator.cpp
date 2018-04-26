@@ -20,6 +20,31 @@ holdem_game_orchestrator::holdem_game_orchestrator(i_my_poker_lib& poker_lib,
 {
 }
 
+template<typename FuncT>
+std::string holdem_game_orchestrator::read_valid_cards(FuncT get_cards, const size_t expected_num_of_cards)
+{
+    std::string cards;
+
+    const auto& current_board = _table_state_manager.get_table_state().communal_cards;
+    const auto board_cards_count = _poker_lib.get_num_of_parsed_cards(current_board);
+    while (true)
+    {
+        cards = get_cards();
+        if (_poker_lib.get_num_of_parsed_cards(cards) != expected_num_of_cards)
+        {
+            _user_interaction.notify_player("Cannot parse card(s), please try again");
+        }
+        else if (_poker_lib.get_num_of_parsed_cards(cards) != (board_cards_count + expected_num_of_cards))
+        {
+            _user_interaction.notify_player("At least one of the cards is already on the board");
+        }
+        else
+        {
+            return cards;
+        }
+    }
+}
+
 void holdem_game_orchestrator::run_game()
 {
     while (true)
@@ -69,26 +94,14 @@ player_action_t holdem_game_orchestrator::get_acting_player_action()
         return _user_interaction.get_opponent_action();
     }
 
-    const auto user_equity = calculate_user_equity(table);
-    const auto pot_equity = _poker_lib.calculate_pot_equity(table.pot, table.get_acting_player_amount_to_call());
+    const auto analysis = _poker_lib.make_acting_player_analysis(table);
 
     std::ostringstream oss;
-    oss << "Your equity of winning is " << user_equity << "% and your pot odds is " << pot_equity << '%' << std::endl;
+    oss << "Your equity of winning is " << analysis.equity << "% and your pot odds is " << analysis.pot_equity << "%. Your recommended action is ";
+    std::visit([&](const auto &obj){ oss << obj << std::endl; }, analysis.recommended_action);
     _user_interaction.notify_player(oss.str());
 
-    const auto recommended_action = player_action_check_or_call{}; // TODO
-    return _user_interaction.get_user_action(recommended_action);
-}
-
-double holdem_game_orchestrator::calculate_user_equity(const table_state& table) const
-{
-    std::vector<std::string> hands;
-    for (const auto& player : table.players)
-    {
-        hands.emplace_back(player.per_game_state.pocket_cards.value_or("random"));
-    }
-
-    return _poker_lib.calculate_equities(hands, table.communal_cards).at(table.acting_player_pos) * 100;
+    return _user_interaction.get_user_action();
 }
 
 std::string holdem_game_orchestrator::table_state_and_stage_to_user_message() const

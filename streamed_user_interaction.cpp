@@ -44,12 +44,8 @@ std::string streamed_user_interaction::get_river()
     return card;
 }
 
-player_action_t streamed_user_interaction::get_user_action(const player_action_t &recommended_action)
+player_action_t streamed_user_interaction::get_user_action()
 {
-    _os << "Your recommended action is ";
-    std::visit([&](const auto &obj){ _os << obj; }, recommended_action);
-    _os << ' ';
-
     return read_player_action();
 }
 
@@ -93,6 +89,8 @@ player_action_t streamed_user_interaction::read_player_action()
 
         _os << "Invalid input. Please specify either fold, check, call or raise" << std::endl;
     }
+
+    throw std::runtime_error("Cannot read user input");
 }
 
 void streamed_user_interaction::notify_player(const std::string &message)

@@ -15,7 +15,7 @@ public:
     virtual std::string get_turn() = 0;
     virtual std::string get_river() = 0;
 
-    virtual player_action_t get_user_action(const player_action_t &recommended_action) = 0;
+    virtual player_action_t get_user_action() = 0;
     virtual player_action_t get_opponent_action() = 0;
 
     virtual void notify_player(const std::string& message) = 0;

@@ -11,7 +11,9 @@ public:
 
     size_t get_num_of_parsed_cards(const std::string &cards) const override;
 
-    std::vector<double> calculate_equities(const std::vector<std::string> &hands, const std::string &board) override;
+    player_analysis make_acting_player_analysis(const table_state &table) override;
+
+    std::vector<double> calculate_equities(const table_state &table) override;
     double calculate_expected_value(const table_state &table, double equity, size_t player_pos) const override;
     double calculate_acting_player_expected_value(const table_state &table, double equity) const override;
 

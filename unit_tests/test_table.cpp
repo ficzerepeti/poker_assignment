@@ -55,18 +55,18 @@ TEST(test_holdem_table_state_manager, invalid_initialisations)
 {
     // Not enough players
     EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({}, 0, 10, 20));
-    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{100}}, 0, 10, 20));
+    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{100, ""}}, 0, 10, 20));
     // Invalid dealer pos
-    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{100}, {100}}, 2, 10, 20));
+    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{100, ""}, {100, ""}}, 2, 10, 20));
     // Incorrect blind sizes
-    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{100}, {100}}, 0, 20, 20));
-    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{100}, {100}}, 0, 20, 10));
+    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{100, ""}, {100, ""}}, 0, 20, 20));
+    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{100, ""}, {100, ""}}, 0, 20, 10));
     // Not enough player stack
-    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{9}, {100}}, 0, 10, 20));
-    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{20}, {19}}, 0, 10, 20));
-    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{9}, {19}}, 0, 10, 20));
-    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{100}, {100}, {100}, {19}}, 1, 10, 20));
-    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{100}, {100}, {100}, {9}}, 2, 10, 20));
+    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{9, ""}, {100, ""}}, 0, 10, 20));
+    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{20, ""}, {19, ""}}, 0, 10, 20));
+    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{9, ""}, {19, ""}}, 0, 10, 20));
+    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{100, ""}, {100, ""}, {100, ""}, {19, ""}}, 1, 10, 20));
+    EXPECT_ANY_THROW(poker_lib::holdem_table_state_manager({{100, ""}, {100, ""}, {100, ""}, {9, ""}}, 2, 10, 20));
 }
 
 TEST(test_holdem_table_state_manager, starting_state_heads_up_1st_player_deals)
@@ -80,10 +80,10 @@ TEST(test_holdem_table_state_manager, starting_state_heads_up_1st_player_deals)
     expected.acting_player_pos = 0;
     expected.dealer_pos = 0;
 
-    expected.players.emplace_back(poker_lib::player_state{90, {false, {}, 10}, {} });
-    expected.players.emplace_back(poker_lib::player_state{80, {false, {}, 20}, {} });
+    expected.players.emplace_back(poker_lib::player_state{90, {false, {}, 10}, {}, "" });
+    expected.players.emplace_back(poker_lib::player_state{80, {false, {}, 20}, {}, "" });
 
-    poker_lib::holdem_table_state_manager state_manager({{100}, {100}},
+    poker_lib::holdem_table_state_manager state_manager({{100, ""}, {100, ""}},
                                                         expected.dealer_pos,
                                                         expected.small_blind_size,
                                                         expected.big_blind_size);
@@ -102,10 +102,10 @@ TEST(test_holdem_table_state_manager, starting_state_heads_up_2nd_player_deals)
     expected.acting_player_pos = 1;
     expected.dealer_pos = 1;
 
-    expected.players.emplace_back(poker_lib::player_state{80, {false, {}, 20}, {} });
-    expected.players.emplace_back(poker_lib::player_state{90, {false, {}, 10}, {} });
+    expected.players.emplace_back(poker_lib::player_state{80, {false, {}, 20}, {}, "" });
+    expected.players.emplace_back(poker_lib::player_state{90, {false, {}, 10}, {}, "" });
 
-    poker_lib::holdem_table_state_manager state_manager({{100}, {100}},
+    poker_lib::holdem_table_state_manager state_manager({{100, ""}, {100, ""}},
                                                         expected.dealer_pos,
                                                         expected.small_blind_size,
                                                         expected.big_blind_size);
@@ -124,11 +124,11 @@ TEST(test_holdem_table_state_manager, starting_state_3_players_1st_player_deals)
     expected.acting_player_pos = 0;
     expected.dealer_pos = 0;
 
-    expected.players.emplace_back(poker_lib::player_state{100, {}, {} });
-    expected.players.emplace_back(poker_lib::player_state{90, {false, {}, 10}, {} });
-    expected.players.emplace_back(poker_lib::player_state{80, {false, {}, 20}, {} });
+    expected.players.emplace_back(poker_lib::player_state{100, {}, {}, "" });
+    expected.players.emplace_back(poker_lib::player_state{90, {false, {}, 10}, {}, "" });
+    expected.players.emplace_back(poker_lib::player_state{80, {false, {}, 20}, {}, "" });
 
-    poker_lib::holdem_table_state_manager state_manager({{100}, {100}, {100}},
+    poker_lib::holdem_table_state_manager state_manager({{100, ""}, {100, ""}, {100, ""}},
                                                         expected.dealer_pos,
                                                         expected.small_blind_size,
                                                         expected.big_blind_size);
@@ -147,11 +147,11 @@ TEST(test_holdem_table_state_manager, starting_state_3_players_2nd_player_deals)
     expected.acting_player_pos = 1;
     expected.dealer_pos = 1;
 
-    expected.players.emplace_back(poker_lib::player_state{80, {false, {}, 20}, {} });
-    expected.players.emplace_back(poker_lib::player_state{100, {}, {} });
-    expected.players.emplace_back(poker_lib::player_state{90, {false, {}, 10}, {} });
+    expected.players.emplace_back(poker_lib::player_state{80, {false, {}, 20}, {}, "" });
+    expected.players.emplace_back(poker_lib::player_state{100, {}, {}, "" });
+    expected.players.emplace_back(poker_lib::player_state{90, {false, {}, 10}, {}, "" });
     
-    poker_lib::holdem_table_state_manager state_manager({{100}, {100}, {100}},
+    poker_lib::holdem_table_state_manager state_manager({{100, ""}, {100, ""}, {100, ""}},
                                                         expected.dealer_pos,
                                                         expected.small_blind_size,
                                                         expected.big_blind_size);
@@ -170,10 +170,10 @@ TEST(test_holdem_table_state_manager, throws_if_unexpected_method_called)
     expected.acting_player_pos = 0;
     expected.dealer_pos = 0;
 
-    expected.players.emplace_back(poker_lib::player_state{90, {false, {}, 10}, {} });
-    expected.players.emplace_back(poker_lib::player_state{80, {false, {}, 20}, {} });
+    expected.players.emplace_back(poker_lib::player_state{90, {false, {}, 10}, {}, "" });
+    expected.players.emplace_back(poker_lib::player_state{80, {false, {}, 20}, {}, "" });
 
-    poker_lib::holdem_table_state_manager state_manager({{100}, {100}},
+    poker_lib::holdem_table_state_manager state_manager({{100, ""}, {100, ""}},
                                                         expected.dealer_pos,
                                                         expected.small_blind_size,
                                                         expected.big_blind_size);
@@ -322,12 +322,12 @@ TEST(test_holdem_table_state_manager, full_game_4_players)
     expected.acting_player_pos = 1;
     expected.dealer_pos = 2;
 
-    expected.players.emplace_back(poker_lib::player_state{4980, {false, {}, 20}, {} });
-    expected.players.emplace_back(poker_lib::player_state{5000, {}, {} });
-    expected.players.emplace_back(poker_lib::player_state{5000, {}, {} });
-    expected.players.emplace_back(poker_lib::player_state{4990, {false, {}, 10}, {} });
+    expected.players.emplace_back(poker_lib::player_state{4980, {false, {}, 20}, {}, "" });
+    expected.players.emplace_back(poker_lib::player_state{5000, {}, {}, "" });
+    expected.players.emplace_back(poker_lib::player_state{5000, {}, {}, "" });
+    expected.players.emplace_back(poker_lib::player_state{4990, {false, {}, 10}, {}, "" });
 
-    poker_lib::holdem_table_state_manager state_manager(std::vector<initial_player_state>(4, {5000}),
+    poker_lib::holdem_table_state_manager state_manager(std::vector<poker_lib::initial_player_state>(4, {5000, ""}),
                                                         expected.dealer_pos,
                                                         expected.small_blind_size,
                                                         expected.big_blind_size);

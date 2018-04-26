@@ -9,7 +9,7 @@
 
 static std::vector<poker_lib::initial_player_state> get_num_of_players_and_stacks()
 {
-    std::cout << "Before a game starts I need to know what are the player names and their current stack size is.\n"
+    std::cout << "Before a game starts please specify the player names and their current stack size.\n"
                  "Please use the format: <stack_size> <player_name>. Entering an empty line finishes the input\n";
 
     std::vector<poker_lib::initial_player_state> result;
@@ -36,6 +36,8 @@ static size_t get_user_position()
     {
         return std::stoull(input);
     }
+
+    throw std::runtime_error("Cannot read user position");
 }
 
 int main()
