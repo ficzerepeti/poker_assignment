@@ -29,12 +29,12 @@ static std::vector<poker_lib::initial_player_state> get_num_of_players_and_stack
 
 static size_t get_user_position()
 {
-    std::cout << "What is your position (zero based index)?\n";
+    std::cout << "What is your position (one based index)?\n";
 
     std::string input;
     while (std::getline(std::cin, input) && !input.empty())
     {
-        return std::stoull(input);
+        return std::stoull(input) - 1;
     }
 
     throw std::runtime_error("Cannot read user position");

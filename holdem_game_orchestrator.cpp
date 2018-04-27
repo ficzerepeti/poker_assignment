@@ -97,7 +97,8 @@ player_action_t holdem_game_orchestrator::get_acting_player_action()
     const auto analysis = _poker_lib.make_acting_player_analysis(table);
 
     std::ostringstream oss;
-    oss << "Your equity of winning is " << analysis.equity << "% and your pot odds is " << analysis.pot_equity << "%. Your recommended action is ";
+    oss << "Your equity of winning is " << (100 * analysis.equity)
+        << "% and your pot equity is " << (100 * analysis.pot_equity) << "%. Your recommended action is ";
     std::visit([&](const auto &obj){ oss << obj << std::endl; }, analysis.recommended_action);
     _user_interaction.notify_player(oss.str());
 
@@ -123,17 +124,21 @@ std::string holdem_game_orchestrator::table_state_and_stage_to_user_message() co
                      << std::setw(text_width.at(2)) << "action";
     for (size_t pos = 0; pos < table.players.size(); ++pos)
     {
-        oss << std::endl;
-
         const auto& player = table.players.at(pos);
 
-        std::string attributes(player.player_name + ' ');
+        std::string attributes(player.player_name);
+        if (!attributes.empty())
+        {
+            attributes = ' ';
+        }
+        if (_user_pos == pos) { attributes += "* you, "; }
         if (table.acting_player_pos == pos) { attributes += "*** acting, "; }
         if (table.dealer_pos == pos) { attributes += "dealer, "; }
         if (player.per_game_state.has_folded) { attributes += "folded"; }
 
-        oss << std::setw(text_width.at(0)) << attributes;
-        oss << std::setw(text_width.at(1));
+        oss << std::endl
+            << std::setw(text_width.at(0)) << attributes
+            << std::setw(text_width.at(1));
         if (player.current_stack == 0)
         {
             oss << "all in";

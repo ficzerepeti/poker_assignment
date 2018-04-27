@@ -1,39 +1,12 @@
 #include <omp/CardRange.h>
 #include <omp/EquityCalculator.h>
 #include <sstream>
+#include <iostream>
 #include "my_poker_lib.h"
 
 namespace poker_lib {
 
-size_t my_poker_lib::get_num_of_parsed_cards(const std::string &cards) const
-{
-    return omp::bitCount(omp::CardRange::getCardMask(cards));
-}
-
-player_analysis my_poker_lib::make_acting_player_analysis(const table_state &table)
-{
-    player_analysis analysis;
-
-    analysis.equity = calculate_equities(table).at(table.acting_player_pos) * 100;
-    analysis.pot_equity = calculate_pot_equity(table.pot, table.get_acting_player_amount_to_call());
-
-    if (analysis.pot_equity > analysis.equity)
-    {
-        analysis.recommended_action = player_action_fold{};
-    }
-    else if (analysis.equity - analysis.pot_equity > 10)
-    {
-        analysis.recommended_action = player_action_raise{table.pot * 2 / 3}; // TODO
-    }
-    else
-    {
-        analysis.recommended_action = player_action_check_or_call{};
-    }
-
-    return analysis;
-}
-
-std::vector<double> my_poker_lib::calculate_equities(const table_state &table)
+std::vector<double> calculate_equities(const table_state &table)
 {
     if (table.players.size() > omp::MAX_PLAYERS)
     {
@@ -62,32 +35,44 @@ std::vector<double> my_poker_lib::calculate_equities(const table_state &table)
     return {result.equity, result.equity + hands.size()};
 }
 
-double my_poker_lib::calculate_pot_equity(uint64_t pot, uint64_t increment)
+double calculate_pot_equity(uint64_t pot, uint64_t increment)
 {
-    return 100 * static_cast<double>(increment) / static_cast<double>(pot + increment);
+    return static_cast<double>(increment) / static_cast<double>(pot + increment);
 }
 
-uint64_t my_poker_lib::calculate_optimal_bet_size(uint64_t stack, uint64_t pot, double equity, size_t num_of_players)
+uint64_t calculate_increment_to_get_pot_eq(const uint64_t pot, const double equity)
 {
-    // Split to low and high SPR
-    const bool is_low_spr = (stack / pot) < 4;
-    if (is_low_spr)
+    return static_cast<uint64_t>(equity * pot / (1 - equity));
+}
+
+size_t my_poker_lib::get_num_of_parsed_cards(const std::string &cards) const
+{
+    return omp::bitCount(omp::CardRange::getCardMask(cards));
+}
+
+player_analysis my_poker_lib::make_acting_player_analysis(const table_state &table)
+{
+    player_analysis analysis;
+
+    analysis.equity = calculate_equities(table).at(table.acting_player_pos);
+    analysis.pot_equity = calculate_pot_equity(table.pot, table.get_acting_player_amount_to_call());
+
+    const auto fixed_raise = table.pot * 2 / 3;
+
+    if (analysis.pot_equity > analysis.equity)
     {
-        return 0; // TODO
+        analysis.recommended_action = player_action_fold{};
+    }
+    else if (const auto max_plus_ev_increment = calculate_increment_to_get_pot_eq(table.pot, analysis.equity); max_plus_ev_increment > fixed_raise)
+    {
+        analysis.recommended_action = player_action_raise{fixed_raise};
+    }
+    else
+    {
+        analysis.recommended_action = player_action_check_or_call{};
     }
 
-    return pot / 2; // TODO
-}
-
-double my_poker_lib::calculate_expected_value(const table_state &table, double equity, size_t player_pos) const
-{
-    const auto amount_to_call = table.get_player_amount_to_call(player_pos);
-    return (table.pot * equity) - (1 - equity) * amount_to_call;
-}
-
-double my_poker_lib::calculate_acting_player_expected_value(const table_state &table, double equity) const
-{
-    return calculate_expected_value(table, equity, table.acting_player_pos);
+    return analysis;
 }
 
 } // end of namespace poker_lib
