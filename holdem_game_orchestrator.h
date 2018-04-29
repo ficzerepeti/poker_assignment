@@ -24,7 +24,9 @@ private:
     std::string table_state_and_stage_to_user_message() const;
 
     template <typename FuncT>
-    std::string read_valid_cards(FuncT get_cards, const size_t expected_num_of_cards);
+    std::string read_valid_cards(FuncT get_cards, size_t expected_num_of_cards);
+
+    void execute_showdown();
 
     i_my_poker_lib& _poker_lib;
     i_user_interaction& _user_interaction;

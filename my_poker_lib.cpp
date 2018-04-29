@@ -2,11 +2,13 @@
 #include <omp/EquityCalculator.h>
 #include <sstream>
 #include <iostream>
+#include <map>
+#include <set>
 #include "my_poker_lib.h"
 
 namespace poker_lib {
 
-std::vector<double> calculate_equities(const table_state &table)
+omp::EquityCalculator::Results calculate_equity_results(const table_state &table)
 {
     if (table.players.size() > omp::MAX_PLAYERS)
     {
@@ -20,19 +22,45 @@ std::vector<double> calculate_equities(const table_state &table)
     std::vector<omp::CardRange> hands;
     for (const auto &player : table.players)
     {
-        hands.emplace_back(player.per_game_state.pocket_cards.value_or("random"));
+        if (!player.has_folded())
+        {
+            hands.emplace_back(player.per_game_state.pocket_cards.value_or("random"));
+        }
     }
 
     omp::EquityCalculator eq;
 
-    eq.start(std::vector<omp::CardRange>{hands.begin(), hands.end()},
-             omp::CardRange::getCardMask(table.communal_cards),
-             omp::CardRange::getCardMask(""),
-             false);
+    const auto valid_cards = eq.start(std::vector<omp::CardRange>{hands.begin(), hands.end()},
+                                      omp::CardRange::getCardMask(table.communal_cards),
+                                      omp::CardRange::getCardMask(""),
+                                      false);
+
+    if (!valid_cards)
+    {
+        std::ostringstream oss;
+        oss << "Cannot evaluate table. Table: " << table;
+        throw std::invalid_argument(oss.str());
+    }
+
     eq.wait();
 
-    const auto &result = eq.getResults();
-    return {result.equity, result.equity + hands.size()};
+    return eq.getResults();
+}
+
+std::vector<double> calculate_equities(const table_state &table)
+{
+    const auto &equity_result = calculate_equity_results(table);
+
+    std::vector<double> result;
+
+    size_t equity_pos = 0;
+    for (const auto &player : table.players)
+    {
+        const auto equity = player.has_folded() ? 0 : equity_result.equity[equity_pos++];
+        result.emplace_back(equity);
+    }
+
+    return result;
 }
 
 double calculate_pot_equity(uint64_t pot, uint64_t increment)

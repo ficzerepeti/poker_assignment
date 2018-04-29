@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <sstream>
 #include <type_traits>
+#include <set>
 
 #include "holdem_table_state_manager.h"
 
@@ -73,6 +74,7 @@ holdem_table_state_manager::holdem_table_state_manager(const std::vector<initial
         throw std::invalid_argument(oss.str());
     }
     handle_betting_player_action(player_action_raise{small_blind_size});
+    _table_state.get_acting_player().per_betting_state.pre_flop_bets.clear();
     _table_state.move_to_next_betting_player();
 
     auto &big_blind = _table_state.get_acting_player();
@@ -84,6 +86,7 @@ holdem_table_state_manager::holdem_table_state_manager(const std::vector<initial
         throw std::invalid_argument(oss.str());
     }
     handle_betting_player_action(player_action_raise{big_blind_size - small_blind_size});
+    _table_state.get_acting_player().per_betting_state.pre_flop_bets.clear();
     _table_state.move_to_next_betting_player();
 }
 
@@ -133,6 +136,7 @@ void holdem_table_state_manager::set_acting_player_action(const player_action_t 
     case game_stages::deal_communal_cards:
     case game_stages::deal_turn_card:
     case game_stages::deal_river_card:
+    case game_stages::showdown:
     case game_stages::end_of_game:
     {
         std::ostringstream oss;
@@ -148,7 +152,6 @@ void holdem_table_state_manager::set_acting_player_action(const player_action_t 
     }
 
     std::visit([this](const auto& arg){ handle_betting_player_action(arg); }, action);
-    _table_state.get_acting_player().get_actions(_table_state.current_stage).emplace_back(action);
 
     const bool is_betting_still_ongoing = _table_state.move_to_next_betting_player();
     if (!is_betting_still_ongoing)
@@ -164,6 +167,8 @@ void holdem_table_state_manager::handle_betting_player_action(const player_actio
 {
     auto& player = _table_state.get_acting_player();
     player.per_game_state.has_folded = true;
+
+    _table_state.get_acting_player().get_actions(_table_state.current_stage).emplace_back(action);
 }
 
 void holdem_table_state_manager::handle_betting_player_action(const player_action_check_or_call &action)
@@ -176,6 +181,8 @@ void holdem_table_state_manager::handle_betting_player_action(const player_actio
     _table_state.pot += amount;
     player.current_stack -= amount;
     player.per_game_state.contribution_to_pot += amount;
+
+    _table_state.get_acting_player().get_actions(_table_state.current_stage).emplace_back(action);
 }
 
 void holdem_table_state_manager::handle_betting_player_action(const player_action_raise &action)
@@ -192,11 +199,84 @@ void holdem_table_state_manager::handle_betting_player_action(const player_actio
     {
         const auto raised_amount = amount_contributed - amount_to_call;
         _table_state.total_contribution_to_stay_in_game += raised_amount;
+
+        _table_state.get_acting_player().get_actions(_table_state.current_stage).emplace_back(player_action_raise{raised_amount});
+    }
+    else
+    {
+        _table_state.get_acting_player().get_actions(_table_state.current_stage).emplace_back(player_action_check_or_call{});
     }
 
     _table_state.pot += amount_contributed;
     player.current_stack -= amount_contributed;
     player.per_game_state.contribution_to_pot += amount_contributed;
+}
+
+std::vector<split_pot> holdem_table_state_manager::execute_showdown()
+{
+    throw_if_unexpected_call(_table_state.current_stage, game_stages::showdown, __func__);
+
+    const auto& players = _table_state.players;
+
+    std::unordered_set<size_t> winner_positions;
+    for (size_t pos = 0; pos < _table_state.players.size(); ++pos)
+    {
+        const auto &player = _table_state.players.at(pos);
+        // Anyone who hasn't folded yet is a winner
+        if (!player.has_folded())
+        {
+            winner_positions.emplace(pos);
+        }
+    }
+
+    std::set<uint64_t> contribution_limits;
+    for (const auto &position : winner_positions)
+    {
+        const auto& player = players.at(position);
+        contribution_limits.insert(player.per_game_state.contribution_to_pot);
+    }
+
+    std::vector<split_pot> split_pots;
+
+    // Calculate split pots
+    uint64_t prev_contr_limit = 0;
+    for (const auto &limit : contribution_limits)
+    {
+        split_pots.emplace_back();
+        auto& current_split = split_pots.back();
+
+        for (size_t pos = 0; pos < players.size(); ++pos)
+        {
+            const auto& player = players.at(pos);
+            if (player.per_game_state.contribution_to_pot > prev_contr_limit
+                && player.per_game_state.contribution_to_pot <= limit)
+            {
+                const auto increment = std::min(limit, player.per_game_state.contribution_to_pot) - prev_contr_limit;
+                current_split.split_size += increment;
+
+                if (winner_positions.count(pos))
+                {
+                    current_split.participant_positions.emplace(pos);
+                }
+            }
+        }
+
+        prev_contr_limit = limit;
+    }
+
+    // Give winners their chips
+    for (const auto &split : split_pots)
+    {
+        const auto per_winner_split = split.split_size / split.participant_positions.size();
+
+        for (const auto &pos : split.participant_positions)
+        {
+            auto& player = _table_state.players.at(pos);
+            player.current_stack += per_winner_split;
+        }
+    }
+
+    return split_pots;
 }
 
 } // end of namespace poker_lib

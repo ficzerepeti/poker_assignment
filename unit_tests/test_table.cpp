@@ -183,6 +183,7 @@ TEST(test_holdem_table_state_manager, throws_if_unexpected_method_called)
     EXPECT_ANY_THROW(state_manager.set_river("Ts"));
     EXPECT_ANY_THROW(state_manager.set_turn("Ts"));
     EXPECT_ANY_THROW(state_manager.set_acting_player_action(poker_lib::player_action_fold{}));
+    EXPECT_ANY_THROW(state_manager.execute_showdown());
     EXPECT_EQ(expected, state_manager.get_table_state());
 
     // Move to pre-flop betting
@@ -196,6 +197,7 @@ TEST(test_holdem_table_state_manager, throws_if_unexpected_method_called)
     EXPECT_ANY_THROW(state_manager.set_flop("Ts 9d 3c"));
     EXPECT_ANY_THROW(state_manager.set_turn("8s"));
     EXPECT_ANY_THROW(state_manager.set_river("9s"));
+    EXPECT_ANY_THROW(state_manager.execute_showdown());
     EXPECT_EQ(expected, state_manager.get_table_state());
 
     // Move to flop
@@ -214,6 +216,7 @@ TEST(test_holdem_table_state_manager, throws_if_unexpected_method_called)
     EXPECT_ANY_THROW(state_manager.set_acting_player_action(poker_lib::player_action_check_or_call{}));
     EXPECT_ANY_THROW(state_manager.set_turn("8s"));
     EXPECT_ANY_THROW(state_manager.set_river("9s"));
+    EXPECT_ANY_THROW(state_manager.execute_showdown());
 
     // Move to flop betting
     expected.communal_cards = "Ts 9d 3c";
@@ -227,6 +230,7 @@ TEST(test_holdem_table_state_manager, throws_if_unexpected_method_called)
     EXPECT_ANY_THROW(state_manager.set_flop("Ts 9d 3c"));
     EXPECT_ANY_THROW(state_manager.set_turn("8s"));
     EXPECT_ANY_THROW(state_manager.set_river("9s"));
+    EXPECT_ANY_THROW(state_manager.execute_showdown());
     EXPECT_EQ(expected, state_manager.get_table_state());
 
     // Move to turn
@@ -245,6 +249,7 @@ TEST(test_holdem_table_state_manager, throws_if_unexpected_method_called)
     EXPECT_ANY_THROW(state_manager.set_acting_player_action(poker_lib::player_action_check_or_call{}));
     EXPECT_ANY_THROW(state_manager.set_flop("Ts 9d 3c"));
     EXPECT_ANY_THROW(state_manager.set_river("9s"));
+    EXPECT_ANY_THROW(state_manager.execute_showdown());
 
     // Move to turn betting
     expected.current_stage = poker_lib::game_stages::turn_betting_round;
@@ -258,6 +263,7 @@ TEST(test_holdem_table_state_manager, throws_if_unexpected_method_called)
     EXPECT_ANY_THROW(state_manager.set_flop("Ts 9d 3c"));
     EXPECT_ANY_THROW(state_manager.set_turn("8s"));
     EXPECT_ANY_THROW(state_manager.set_river("9s"));
+    EXPECT_ANY_THROW(state_manager.execute_showdown());
     EXPECT_EQ(expected, state_manager.get_table_state());
 
     // Move to river
@@ -276,6 +282,7 @@ TEST(test_holdem_table_state_manager, throws_if_unexpected_method_called)
     EXPECT_ANY_THROW(state_manager.set_acting_player_action(poker_lib::player_action_check_or_call{}));
     EXPECT_ANY_THROW(state_manager.set_flop("Ts 9d 3c"));
     EXPECT_ANY_THROW(state_manager.set_turn("8s"));
+    EXPECT_ANY_THROW(state_manager.execute_showdown());
 
     // Move to river betting
     expected.communal_cards += " 8s";
@@ -289,6 +296,7 @@ TEST(test_holdem_table_state_manager, throws_if_unexpected_method_called)
     EXPECT_ANY_THROW(state_manager.set_flop("Ts 9d 3c"));
     EXPECT_ANY_THROW(state_manager.set_turn("8s"));
     EXPECT_ANY_THROW(state_manager.set_river("9s"));
+    EXPECT_ANY_THROW(state_manager.execute_showdown());
     EXPECT_EQ(expected, state_manager.get_table_state());
 
     // Move to showdown
@@ -298,7 +306,7 @@ TEST(test_holdem_table_state_manager, throws_if_unexpected_method_called)
     acting_player_checks_or_calls(expected);
     expected.acting_player_pos = 1;
     acting_player_checks_or_calls(expected);
-    expected.current_stage = poker_lib::game_stages::end_of_game;
+    expected.current_stage = poker_lib::game_stages::showdown;
     EXPECT_EQ(expected, state_manager.get_table_state());
 
     // Showdown
@@ -309,6 +317,8 @@ TEST(test_holdem_table_state_manager, throws_if_unexpected_method_called)
     EXPECT_ANY_THROW(state_manager.set_river("9s"));
     EXPECT_ANY_THROW(state_manager.set_acting_player_action(poker_lib::player_action_check_or_call{}));
     EXPECT_EQ(expected, state_manager.get_table_state());
+
+    EXPECT_NO_THROW(state_manager.execute_showdown());
 }
 
 TEST(test_holdem_table_state_manager, full_game_4_players)
@@ -323,11 +333,11 @@ TEST(test_holdem_table_state_manager, full_game_4_players)
     expected.dealer_pos = 2;
 
     expected.players.emplace_back(poker_lib::player_state{4980, {false, {}, 20}, {}, "" });
-    expected.players.emplace_back(poker_lib::player_state{5000, {}, {}, "" });
-    expected.players.emplace_back(poker_lib::player_state{5000, {}, {}, "" });
+    expected.players.emplace_back(poker_lib::player_state{4000, {}, {}, "" });
+    expected.players.emplace_back(poker_lib::player_state{2000, {}, {}, "" });
     expected.players.emplace_back(poker_lib::player_state{4990, {false, {}, 10}, {}, "" });
 
-    poker_lib::holdem_table_state_manager state_manager(std::vector<poker_lib::initial_player_state>(4, {5000, ""}),
+    poker_lib::holdem_table_state_manager state_manager({{5000, ""}, {4000, ""}, {2000, ""}, {5000, ""}},
                                                         expected.dealer_pos,
                                                         expected.small_blind_size,
                                                         expected.big_blind_size);
@@ -348,8 +358,8 @@ TEST(test_holdem_table_state_manager, full_game_4_players)
         EXPECT_EQ(expected, state_manager.get_table_state());
     }
     {
-        EXPECT_NO_THROW(state_manager.set_acting_player_action(poker_lib::player_action_fold{}));
-        acting_player_folds(expected);
+        EXPECT_NO_THROW(state_manager.set_acting_player_action(poker_lib::player_action_raise{expected.get_acting_player().current_stack}));
+        acting_player_raises(expected, expected.get_acting_player().current_stack);
         expected.acting_player_pos = 3;
         EXPECT_EQ(expected, state_manager.get_table_state());
     }
@@ -357,6 +367,12 @@ TEST(test_holdem_table_state_manager, full_game_4_players)
         EXPECT_NO_THROW(state_manager.set_acting_player_action(poker_lib::player_action_check_or_call{}));
         acting_player_checks_or_calls(expected);
         expected.acting_player_pos = 0;
+        EXPECT_EQ(expected, state_manager.get_table_state());
+    }
+    {
+        EXPECT_NO_THROW(state_manager.set_acting_player_action(poker_lib::player_action_check_or_call{}));
+        acting_player_checks_or_calls(expected);
+        expected.acting_player_pos = 1;
         EXPECT_EQ(expected, state_manager.get_table_state());
     }
     {
@@ -444,7 +460,20 @@ TEST(test_holdem_table_state_manager, full_game_4_players)
 
     EXPECT_NO_THROW(state_manager.set_acting_player_action(poker_lib::player_action_check_or_call{}));
     acting_player_checks_or_calls(expected);
-    expected.current_stage = poker_lib::game_stages::end_of_game;
+    expected.current_stage = poker_lib::game_stages::showdown;
     expected.acting_player_pos = 3;
     EXPECT_EQ(expected, state_manager.get_table_state());
+
+    const auto results = state_manager.execute_showdown();
+    EXPECT_EQ(2, results.size());
+
+    const auto& split_1 = results.front();
+    EXPECT_EQ(2000 * expected.players.size(), split_1.split_size);
+    EXPECT_EQ(3, split_1.participant_positions.size());
+
+    const auto& split_2 = results.back();
+    EXPECT_EQ(1400, split_2.split_size);
+    EXPECT_EQ(2, split_1.participant_positions.size());
+
+    EXPECT_EQ(expected.pot, split_1.split_size + split_2.split_size);
 }

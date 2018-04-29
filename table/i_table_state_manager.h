@@ -2,12 +2,20 @@
 
 #include <cstdint>
 #include <string>
+#include <unordered_set>
+#include <vector>
 
 #include "table/game_stages.h"
 #include "table/player_actions.h"
 #include "table/table_state.h"
 
 namespace poker_lib {
+
+struct split_pot
+{
+    uint64_t split_size;
+    std::unordered_set<size_t> participant_positions;
+};
 
 class i_table_state_manager
 {
@@ -23,6 +31,8 @@ public:
     virtual void set_river(const std::string &card) = 0;
 
     virtual void set_acting_player_action(const player_action_t &action) = 0;
+
+    virtual std::vector<split_pot> execute_showdown() = 0;
 };
 
 } // end of namespace poker_lib

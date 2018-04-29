@@ -14,6 +14,7 @@ enum class game_stages
     turn_betting_round,
     deal_river_card,
     river_betting_round,
+    showdown,
     end_of_game,
 };
 std::ostream& operator<<(std::ostream& os, game_stages stage);

@@ -104,7 +104,7 @@ bool operator==(const table_state &lhs, const table_state &rhs)
 
 std::ostream& operator<<(std::ostream &os, const table_state &state)
 {
-    return os << ", current_stage: " << state.current_stage
+    return os << "current_stage: " << state.current_stage
               << ", small_blind_size: " << state.small_blind_size
               << ", big_blind_size: " << state.big_blind_size
               << ", pot: " << state.pot

@@ -36,6 +36,8 @@ public:
     // Throws if current stage is not any of the betting rounds
     void set_acting_player_action(const player_action_t &action) override;
 
+    std::vector<split_pot> execute_showdown() override;
+
 private:
     void handle_betting_player_action(const player_action_fold &action);
     void handle_betting_player_action(const player_action_check_or_call &action);

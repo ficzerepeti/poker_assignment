@@ -17,6 +17,7 @@ std::ostream &operator<<(std::ostream &os, const game_stages stage)
     HANDLE_GAME_STAGE_OSTREAM(turn_betting_round);
     HANDLE_GAME_STAGE_OSTREAM(deal_river_card);
     HANDLE_GAME_STAGE_OSTREAM(river_betting_round);
+    HANDLE_GAME_STAGE_OSTREAM(showdown);
     HANDLE_GAME_STAGE_OSTREAM(end_of_game);
     }
 

@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <sstream>
 #include <type_traits>
+#include <map>
 
 #include "holdem_game_orchestrator.h"
 
@@ -52,7 +53,7 @@ void holdem_game_orchestrator::run_game()
         switch (_table_state_manager.get_table_state().current_stage)
         {
         case game_stages::deal_pocket_cards:
-            _table_state_manager.set_pocket_cards(_user_pos, read_valid_cards([this](){ return _user_interaction.get_pocket_cards(); }, 2));
+            _table_state_manager.set_pocket_cards(_user_pos, read_valid_cards([this](){ return _user_interaction.get_user_pocket_cards(); }, 2));
             break;
 
         case game_stages::deal_communal_cards:
@@ -75,8 +76,13 @@ void holdem_game_orchestrator::run_game()
             _table_state_manager.set_acting_player_action(get_acting_player_action());
             break;
 
+        case game_stages::showdown:
+            execute_showdown();
+            _user_interaction.notify_player("State after this game after showdown: " + table_state_and_stage_to_user_message());
+            break;
+
         case game_stages::end_of_game:
-            _user_interaction.notify_player("End of game has been reached."); // TODO: print out winner
+            // TODO: new game?
             return;
         }
 
@@ -163,6 +169,56 @@ std::string holdem_game_orchestrator::table_state_and_stage_to_user_message() co
     }
 
     return oss.str();
+}
+
+void holdem_game_orchestrator::execute_showdown()
+{
+    auto &table = _table_state_manager.get_table_state();
+    const auto active_player_count = table.get_active_player_count();
+
+    if (active_player_count > 1)
+    {
+        // Read in all pocket cards
+        for (size_t pos = 0; pos < table.players.size(); ++pos)
+        {
+            const auto& player = table.players.at(pos);
+            if (!player.has_folded() && !player.per_game_state.pocket_cards)
+            {
+                const auto cards = read_valid_cards([this, pos]() { return _user_interaction.get_player_pocket_cards(pos); }, 2);
+                _table_state_manager.set_pocket_cards(pos, cards);
+            }
+        }
+    }
+
+    const auto split_pots = _table_state_manager.execute_showdown();
+
+    std::ostringstream oss;
+    if (active_player_count == 1)
+    {
+        if (split_pots.size() != 1 || split_pots.front().participant_positions.size() != 1)
+        {
+            throw std::logic_error("There's only one winner but there are " + std::to_string(split_pots.size()) + " split pots");
+        }
+
+        const auto pos = *split_pots.front().participant_positions.begin();
+        const auto& winner = table.players.at(pos);
+        oss << "Player " << winner.player_name << " at position " << pos << " has won this game. Pot was " << split_pots.front().split_size;
+        return;
+    }
+
+    oss << "There are multiple winners.\n";
+    for (const auto &split : split_pots)
+    {
+        const auto per_winner_split = split.split_size / split.participant_positions.size();
+
+        oss << "Split pot with pot size " << split.split_size << " is divided up between " << split.participant_positions.size() << " winners.";
+        for (const auto &pos : split.participant_positions)
+        {
+            oss << "Player " << table.players.at(pos).player_name << " at position " << (pos + 1) << " has won " << per_winner_split << " from this pot.";
+        }
+    }
+
+    _user_interaction.notify_player(oss.str());
 }
 
 } // end of namespace poker_lib

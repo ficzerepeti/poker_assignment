@@ -12,9 +12,17 @@ streamed_user_interaction::streamed_user_interaction(std::ostream &os, std::istr
 {
 }
 
-std::string streamed_user_interaction::get_pocket_cards()
+std::string streamed_user_interaction::get_user_pocket_cards()
 {
     _os << "What pocket cards have you been dealt?\n";
+    std::string cards;
+    getline(_is, cards);
+    return cards;
+}
+
+std::string streamed_user_interaction::get_player_pocket_cards(const size_t user_pos)
+{
+    _os << "What pocket cards were dealt to player at position:" << (user_pos + 1) << std::endl;
     std::string cards;
     getline(_is, cards);
     return cards;

@@ -13,7 +13,8 @@ public:
     streamed_user_interaction(std::ostream& os, std::istream& is);
     ~streamed_user_interaction() override = default;
 
-    std::string get_pocket_cards() override;
+    std::string get_user_pocket_cards() override;
+    std::string get_player_pocket_cards(size_t user_pos) override;
     std::string get_flop() override;
     std::string get_turn() override;
     std::string get_river() override;
