@@ -473,7 +473,7 @@ TEST(test_holdem_table_state_manager, full_game_4_players)
 
     const auto& split_2 = results.back();
     EXPECT_EQ(1400, split_2.split_size);
-    EXPECT_EQ(2, split_1.participant_positions.size());
+    EXPECT_EQ(2, split_2.participant_positions.size());
 
     EXPECT_EQ(expected.pot, split_1.split_size + split_2.split_size);
 }

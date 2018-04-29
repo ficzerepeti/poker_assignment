@@ -190,6 +190,7 @@ void holdem_game_orchestrator::execute_showdown()
         }
     }
 
+    // TODO: get winner(s) from _poker_lib
     const auto split_pots = _table_state_manager.execute_showdown();
 
     std::ostringstream oss;

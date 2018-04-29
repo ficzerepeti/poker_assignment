@@ -248,13 +248,12 @@ std::vector<split_pot> holdem_table_state_manager::execute_showdown()
         for (size_t pos = 0; pos < players.size(); ++pos)
         {
             const auto& player = players.at(pos);
-            if (player.per_game_state.contribution_to_pot > prev_contr_limit
-                && player.per_game_state.contribution_to_pot <= limit)
+            if (player.per_game_state.contribution_to_pot > prev_contr_limit)
             {
                 const auto increment = std::min(limit, player.per_game_state.contribution_to_pot) - prev_contr_limit;
                 current_split.split_size += increment;
 
-                if (winner_positions.count(pos))
+                if (winner_positions.count(pos) && player.per_game_state.contribution_to_pot >= limit)
                 {
                     current_split.participant_positions.emplace(pos);
                 }
