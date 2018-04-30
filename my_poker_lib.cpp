@@ -8,7 +8,7 @@
 
 namespace poker_lib {
 
-omp::EquityCalculator::Results calculate_equity_results(const table_state &table)
+omp::EquityCalculator::Results calculate_equity_results(const table_state &table, const bool is_showdown)
 {
     if (table.players.size() > omp::MAX_PLAYERS)
     {
@@ -22,10 +22,17 @@ omp::EquityCalculator::Results calculate_equity_results(const table_state &table
     std::vector<omp::CardRange> hands;
     for (const auto &player : table.players)
     {
-        if (!player.has_folded())
+        if (player.has_folded())
         {
-            hands.emplace_back(player.per_game_state.pocket_cards.value_or("random"));
+            continue;
         }
+        if (is_showdown && !player.per_game_state.pocket_cards)
+        {
+            std::ostringstream oss;
+            oss << "During showdown active player " << player.player_name << " has no pocket cards set";
+            throw std::runtime_error(oss.str());
+        }
+        hands.emplace_back(player.per_game_state.pocket_cards.value_or("random"));
     }
 
     omp::EquityCalculator eq;
@@ -49,7 +56,7 @@ omp::EquityCalculator::Results calculate_equity_results(const table_state &table
 
 std::vector<double> calculate_equities(const table_state &table)
 {
-    const auto &equity_result = calculate_equity_results(table);
+    const auto &equity_result = calculate_equity_results(table, false);
 
     std::vector<double> result;
 
@@ -101,6 +108,22 @@ player_analysis my_poker_lib::make_acting_player_analysis(const table_state &tab
     }
 
     return analysis;
+}
+
+std::unordered_set<size_t> my_poker_lib::get_winner_positions(const table_state &table)
+{
+    const auto &equity_result = calculate_equity_results(table, true);
+    std::ostringstream oss;
+
+    if (equity_result.evaluations != 1)
+    {
+        oss << "During showdown only one evaluation is expected but got " << equity_result.evaluations << " instead. Table: " << table;
+        throw std::logic_error(oss.str());
+    }
+
+    std::unordered_set<size_t> winners;
+
+    return winners;
 }
 
 } // end of namespace poker_lib

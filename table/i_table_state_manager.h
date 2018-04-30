@@ -32,7 +32,7 @@ public:
 
     virtual void set_acting_player_action(const player_action_t &action) = 0;
 
-    virtual std::vector<split_pot> execute_showdown() = 0;
+    virtual std::vector<split_pot> execute_showdown(const std::unordered_set<size_t> &winner_positions) = 0;
 };
 
 } // end of namespace poker_lib

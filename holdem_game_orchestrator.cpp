@@ -190,8 +190,8 @@ void holdem_game_orchestrator::execute_showdown()
         }
     }
 
-    // TODO: get winner(s) from _poker_lib
-    const auto split_pots = _table_state_manager.execute_showdown();
+    const auto winners = _poker_lib.get_winner_positions(table);
+    const auto split_pots = _table_state_manager.execute_showdown(winners);
 
     std::ostringstream oss;
     if (active_player_count == 1)

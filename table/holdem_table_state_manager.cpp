@@ -212,20 +212,20 @@ void holdem_table_state_manager::handle_betting_player_action(const player_actio
     player.per_game_state.contribution_to_pot += amount_contributed;
 }
 
-std::vector<split_pot> holdem_table_state_manager::execute_showdown()
+std::vector<split_pot> holdem_table_state_manager::execute_showdown(const std::unordered_set<size_t> &winner_positions)
 {
     throw_if_unexpected_call(_table_state.current_stage, game_stages::showdown, __func__);
 
     const auto& players = _table_state.players;
 
-    std::unordered_set<size_t> winner_positions;
-    for (size_t pos = 0; pos < _table_state.players.size(); ++pos)
+    for (const auto &pos : winner_positions)
     {
         const auto &player = _table_state.players.at(pos);
-        // Anyone who hasn't folded yet is a winner
-        if (!player.has_folded())
+        if (player.has_folded())
         {
-            winner_positions.emplace(pos);
+            std::ostringstream oss;
+            oss << "Player " << player.player_name << " at position " << pos << " is marked as winner as well as folded";
+            throw std::invalid_argument(oss.str());
         }
     }
 
