@@ -46,5 +46,5 @@ endif()
 add_executable(texas_holdem_game main_holdem_game.cpp)
 target_link_libraries(texas_holdem_game my_poker_lib)
 
-add_executable(tests unit_tests/test_table.cpp)
+add_executable(tests unit_tests/test_table.cpp unit_tests/test_my_poker_lib.cpp)
 target_link_libraries(tests gtest gmock_main my_poker_lib)

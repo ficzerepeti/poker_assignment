@@ -14,8 +14,8 @@ public:
     ~my_poker_lib() override = default;
 
     size_t get_num_of_parsed_cards(const std::string &cards) const override;
-    player_analysis make_acting_player_analysis(const table_state &table) override;
 
+    player_analysis make_acting_player_analysis(const table_state &table) override;
     std::unordered_set<size_t> get_winner_positions(const table_state &table) override;
 };
 

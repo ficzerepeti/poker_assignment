@@ -14,17 +14,17 @@ struct table_state
     // Fields
     game_stages current_stage;
 
-    uint64_t small_blind_size;
-    uint64_t big_blind_size;
+    uint64_t small_blind_size = 0;
+    uint64_t big_blind_size = 0;
 
-    uint64_t pot;
-    uint64_t total_contribution_to_stay_in_game;
+    uint64_t pot = 0;
+    uint64_t total_contribution_to_stay_in_game = 0;
     std::string communal_cards;
 
     std::vector<player_state> players;
     // Positions are 0 based
-    size_t acting_player_pos;
-    size_t dealer_pos;
+    size_t acting_player_pos = 0;
+    size_t dealer_pos = 0;
 
     // Methods
     player_state& get_acting_player();
