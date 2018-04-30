@@ -35,7 +35,7 @@ std::string holdem_game_orchestrator::read_valid_cards(FuncT get_cards, const si
         {
             _user_interaction.notify_player("Cannot parse card(s), please try again");
         }
-        else if (_poker_lib.get_num_of_parsed_cards(cards) != (board_cards_count + expected_num_of_cards))
+        else if (_poker_lib.get_num_of_parsed_cards(current_board + cards) != (board_cards_count + expected_num_of_cards))
         {
             _user_interaction.notify_player("At least one of the cards is already on the board");
         }
@@ -83,6 +83,7 @@ void holdem_game_orchestrator::run_game()
 
         case game_stages::end_of_game:
             // TODO: new game?
+            _user_interaction.notify_player("Game ended, bye!");
             return;
         }
 
@@ -124,27 +125,24 @@ std::string holdem_game_orchestrator::table_state_and_stage_to_user_message() co
     }
     oss << ", big blind size: " << table.big_blind_size;
 
-    constexpr std::array<int, 3> text_width{25, 20, 40};
-    oss << std::endl << std::setw(text_width.at(0)) << " "
-                     << std::setw(text_width.at(1)) << "stack size"
-                     << std::setw(text_width.at(2)) << "action";
+    constexpr std::array<int, 4> text_width{10, 25, 20, 40};
+    oss << std::endl << std::setw(text_width.at(0)) << "name"
+                     << std::setw(text_width.at(1)) << "attributes"
+                     << std::setw(text_width.at(2)) << "stack size"
+                     << std::setw(text_width.at(3)) << "action";
     for (size_t pos = 0; pos < table.players.size(); ++pos)
     {
         const auto& player = table.players.at(pos);
 
-        std::string attributes(player.player_name);
-        if (!attributes.empty())
-        {
-            attributes = ' ';
-        }
-        if (_user_pos == pos) { attributes += "* you, "; }
+        std::string attributes;
         if (table.acting_player_pos == pos) { attributes += "*** acting, "; }
         if (table.dealer_pos == pos) { attributes += "dealer, "; }
-        if (player.per_game_state.has_folded) { attributes += "folded"; }
+        if (_user_pos == pos) { attributes += "you, "; }
 
         oss << std::endl
-            << std::setw(text_width.at(0)) << attributes
-            << std::setw(text_width.at(1));
+            << std::setw(text_width.at(0)) << player.player_name
+            << std::setw(text_width.at(1)) << attributes
+            << std::setw(text_width.at(2));
         if (player.current_stack == 0)
         {
             oss << "all in";
@@ -154,8 +152,12 @@ std::string holdem_game_orchestrator::table_state_and_stage_to_user_message() co
             oss << player.current_stack;
         }
 
-        oss << std::setw(text_width.at(2));
-        if (const auto amount_to_call = table.get_player_amount_to_call(pos); amount_to_call > 0)
+        oss << std::setw(text_width.at(3));
+        if (player.per_game_state.has_folded)
+        {
+            oss << "folded";
+        }
+        else if (const auto amount_to_call = table.get_player_amount_to_call(pos); amount_to_call > 0)
         {
             oss << ("amount needed to call: " + std::to_string(amount_to_call));
         }

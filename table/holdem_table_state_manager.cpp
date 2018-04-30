@@ -159,7 +159,7 @@ void holdem_table_state_manager::set_acting_player_action(const player_action_t 
         _table_state.elect_next_acting_player_after_betting();
 
         const bool at_least_two_left = _table_state.get_active_player_count() > 1;
-        _table_state.current_stage = at_least_two_left ? get_next_game_stage(_table_state.current_stage) : game_stages::end_of_game;
+        _table_state.current_stage = at_least_two_left ? get_next_game_stage(_table_state.current_stage) : game_stages::showdown;
     }
 }
 
@@ -274,6 +274,8 @@ std::vector<split_pot> holdem_table_state_manager::execute_showdown(const std::u
             player.current_stack += per_winner_split;
         }
     }
+
+    _table_state.current_stage = get_next_game_stage(_table_state.current_stage);
 
     return split_pots;
 }

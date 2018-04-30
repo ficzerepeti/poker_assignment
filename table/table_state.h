@@ -12,7 +12,7 @@ namespace poker_lib {
 struct table_state
 {
     // Fields
-    game_stages current_stage;
+    game_stages current_stage = game_stages::deal_pocket_cards;
 
     uint64_t small_blind_size = 0;
     uint64_t big_blind_size = 0;

@@ -40,7 +40,7 @@ omp::EquityCalculator::Results calculate_equity_results(const table_state &table
     const auto valid_cards = eq.start(std::vector<omp::CardRange>{hands.begin(), hands.end()},
                                       omp::CardRange::getCardMask(table.communal_cards),
                                       omp::CardRange::getCardMask(""),
-                                      false);
+                                      is_showdown);
 
     if (!valid_cards)
     {
@@ -112,8 +112,19 @@ player_analysis my_poker_lib::make_acting_player_analysis(const table_state &tab
 
 std::unordered_set<size_t> my_poker_lib::get_winner_positions(const table_state &table)
 {
-    const auto &equity_result = calculate_equity_results(table, true);
     std::ostringstream oss;
+    if (table.current_stage != game_stages::showdown)
+    {
+        oss << "Expected showdown stage as current stage but instead got " << table.current_stage;
+        throw std::invalid_argument(oss.str());
+    }
+    if (const auto card_count = get_num_of_parsed_cards(table.communal_cards); card_count != 5)
+    {
+        oss << "Expected all 5 communal cards dealt but instead got " << card_count;
+        throw std::invalid_argument(oss.str());
+    }
+
+    const auto &equity_result = calculate_equity_results(table, true);
 
     if (equity_result.evaluations != 1)
     {
@@ -122,6 +133,22 @@ std::unordered_set<size_t> my_poker_lib::get_winner_positions(const table_state 
     }
 
     std::unordered_set<size_t> winners;
+
+    size_t equity_pos = 0;
+    for (const auto &player : table.players)
+    {
+        if (player.has_folded())
+        {
+            continue;
+        }
+
+        // OMPEval is a bit odd in case of multiple winners this both wins and ties are checked
+        if (equity_result.wins.at(equity_pos) || equity_result.ties.at(equity_pos))
+        {
+            winners.emplace(equity_pos);
+        }
+        ++equity_pos;
+    }
 
     return winners;
 }

@@ -24,10 +24,11 @@ TEST(test_my_poker_lib, get_winner_positions)
     poker_lib::my_poker_lib poker_lib;
 
     poker_lib::table_state table;
+    table.current_stage = poker_lib::game_stages::showdown;
     auto& players = table.players;
     EXPECT_ANY_THROW(poker_lib.get_winner_positions(table));
 
-    table.communal_cards = "As Ks Qs";
+    table.communal_cards = "As Ks Qs 2c 3c";
 
     players.emplace_back(poker_lib::player_state{100, {}, {}, "player1"});
     players.back().per_game_state.contribution_to_pot = 50;
@@ -37,5 +38,14 @@ TEST(test_my_poker_lib, get_winner_positions)
     players.back().per_game_state.contribution_to_pot = 50;
     players.back().per_game_state.pocket_cards = "Jd Td";
 
-    EXPECT_NO_THROW(poker_lib.get_winner_positions(table));
+    {
+        const auto result = poker_lib.get_winner_positions(table);
+        EXPECT_EQ(result, std::unordered_set<uint64_t>{0});
+    }
+    {
+        players.front().per_game_state.pocket_cards = "Jh Th";
+        const auto result = poker_lib.get_winner_positions(table);
+        const std::unordered_set<uint64_t> expected{0, 1};
+        EXPECT_EQ(result, expected);
+    }
 }

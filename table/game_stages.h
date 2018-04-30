@@ -18,6 +18,7 @@ enum class game_stages
     end_of_game,
 };
 std::ostream& operator<<(std::ostream& os, game_stages stage);
+std::string to_string(game_stages stage);
 
 game_stages get_next_game_stage(game_stages stage);
 

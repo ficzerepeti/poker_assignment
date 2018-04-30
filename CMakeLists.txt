@@ -41,6 +41,8 @@ else()
         PUBLIC "-Wextra"
         PUBLIC "-Werror"
         PUBLIC "-Wno-unused-parameter")
+
+    target_link_libraries(my_poker_lib pthread)
 endif()
 
 add_executable(texas_holdem_game main_holdem_game.cpp)

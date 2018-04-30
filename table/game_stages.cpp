@@ -1,4 +1,5 @@
 #include <type_traits>
+#include <sstream>
 #include "game_stages.h"
 
 #define HANDLE_GAME_STAGE_OSTREAM(name) case poker_lib::game_stages::name: return os << #name;
@@ -22,6 +23,13 @@ std::ostream &operator<<(std::ostream &os, const game_stages stage)
     }
 
     return os << "unknown";
+}
+
+std::string to_string(const game_stages stage)
+{
+    std::ostringstream oss;
+    oss << stage;
+    return oss.str();
 }
 
 game_stages get_next_game_stage(const game_stages stage)
