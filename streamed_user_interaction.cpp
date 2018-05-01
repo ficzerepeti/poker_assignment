@@ -65,7 +65,7 @@ player_action_t streamed_user_interaction::get_opponent_action()
 
 player_action_t streamed_user_interaction::read_player_action()
 {
-    _os << "Please specify an action: fold, check, call, raise <value>" << std::endl;
+    _os << "Please specify an action: fold, check/call, raise <value>" << std::endl;
 
     std::string line;
     std::string action;
@@ -77,7 +77,7 @@ player_action_t streamed_user_interaction::read_player_action()
         iss >> action;
         for (auto& c : action)
         {
-            c = std::tolower(c);
+            c = std::tolower(c, std::locale());
         }
 
         if (action == "fold")

@@ -78,7 +78,6 @@ void holdem_game_orchestrator::run_game()
 
         case game_stages::showdown:
             execute_showdown();
-            _user_interaction.notify_player("State after this game after showdown: " + table_state_and_stage_to_user_message());
             break;
 
         case game_stages::end_of_game:
@@ -205,19 +204,20 @@ void holdem_game_orchestrator::execute_showdown()
 
         const auto pos = *split_pots.front().participant_positions.begin();
         const auto& winner = table.players.at(pos);
-        oss << "Player " << winner.player_name << " at position " << pos << " has won this game. Pot was " << split_pots.front().split_size;
-        return;
+        oss << "Player " << winner.player_name << " at position " << (pos + 1) << " has won the pot sized " << split_pots.front().split_size;
     }
-
-    oss << "There are multiple winners.\n";
-    for (const auto &split : split_pots)
+    else
     {
-        const auto per_winner_split = split.split_size / split.participant_positions.size();
-
-        oss << "Split pot with pot size " << split.split_size << " is divided up between " << split.participant_positions.size() << " winners.";
-        for (const auto &pos : split.participant_positions)
+        oss << "There are multiple winners.\n";
+        for (const auto &split : split_pots)
         {
-            oss << "Player " << table.players.at(pos).player_name << " at position " << (pos + 1) << " has won " << per_winner_split << " from this pot.";
+            const auto per_winner_split = split.split_size / split.participant_positions.size();
+
+            oss << "Split pot with pot size " << split.split_size << " is divided up between " << split.participant_positions.size() << " winners.";
+            for (const auto &pos : split.participant_positions)
+            {
+                oss << "Player " << table.players.at(pos).player_name << " at position " << (pos + 1) << " has won " << per_winner_split << " from the pot.";
+            }
         }
     }
 
