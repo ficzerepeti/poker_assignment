@@ -43,6 +43,8 @@ private:
     void handle_betting_player_action(const player_action_check_or_call &action);
     void handle_betting_player_action(const player_action_raise &action);
 
+    void move_to_next_stage_from_card_deal();
+
     table_state _table_state;
 };
 

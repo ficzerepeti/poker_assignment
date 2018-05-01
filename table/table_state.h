@@ -36,6 +36,7 @@ struct table_state
 
     // Number of players that haven't folded so far
     size_t get_active_player_count() const;
+    size_t get_active_and_not_all_in_player_count() const;
 
     // Returns false if no player may act in this betting round meaning this round has finished. True otherwise.
     bool move_to_next_betting_player();

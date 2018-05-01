@@ -35,6 +35,12 @@ size_t table_state::get_active_player_count() const
     return static_cast<size_t>(std::count_if(players.begin(), players.end(), may_act));
 }
 
+size_t table_state::get_active_and_not_all_in_player_count() const
+{
+    auto may_act = [](const player_state& player){ return !player.has_folded() && !player.is_all_in(); };
+    return static_cast<size_t>(std::count_if(players.begin(), players.end(), may_act));
+}
+
 bool table_state::move_to_next_betting_player()
 {
     const auto pos_has_just_acted = acting_player_pos;

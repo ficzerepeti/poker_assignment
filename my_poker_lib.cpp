@@ -118,6 +118,18 @@ std::unordered_set<size_t> my_poker_lib::get_winner_positions(const table_state 
         oss << "Expected showdown stage as current stage but instead got " << table.current_stage;
         throw std::invalid_argument(oss.str());
     }
+
+    if (table.get_active_player_count() == 1)
+    {
+        for (size_t pos = 0; pos < table.players.size(); ++pos)
+        {
+            if (!table.players.at(pos).has_folded())
+            {
+                return {pos};
+            }
+        }
+    }
+
     if (const auto card_count = get_num_of_parsed_cards(table.communal_cards); card_count != 5)
     {
         oss << "Expected all 5 communal cards dealt but instead got " << card_count;

@@ -20,6 +20,34 @@ static void throw_if_unexpected_call(const poker_lib::game_stages current_stage,
 
 namespace poker_lib {
 
+static game_stages get_next_card_deal_turn(const game_stages stage)
+{
+    switch (stage)
+    {
+    case game_stages::deal_pocket_cards:
+    case game_stages::pre_flop_betting_round:
+        return game_stages::deal_communal_cards;
+
+    case game_stages::deal_communal_cards:
+    case game_stages::flop_betting_round:
+        return game_stages::deal_turn_card;
+
+    case game_stages::deal_turn_card:
+    case game_stages::turn_betting_round:
+        return game_stages::deal_river_card;
+
+    case game_stages::deal_river_card:
+    case game_stages::river_betting_round:
+    case game_stages::showdown:
+        return game_stages::showdown;
+
+    case game_stages::end_of_game:
+        return game_stages::end_of_game;
+    }
+
+    return game_stages::end_of_game;
+}
+
 holdem_table_state_manager::holdem_table_state_manager(const std::vector<initial_player_state> &players,
                                                        const size_t dealer_position,
                                                        const uint64_t small_blind_size,
@@ -96,7 +124,7 @@ void holdem_table_state_manager::set_pocket_cards(size_t player_pos, const std::
 
     if (_table_state.current_stage == game_stages::deal_pocket_cards)
     {
-        _table_state.current_stage = get_next_game_stage(_table_state.current_stage);
+        move_to_next_stage_from_card_deal();
     }
 }
 
@@ -105,7 +133,7 @@ void holdem_table_state_manager::set_flop(const std::string &cards)
     throw_if_unexpected_call(_table_state.current_stage, game_stages::deal_communal_cards, __func__);
 
     _table_state.communal_cards = cards;
-    _table_state.current_stage = get_next_game_stage(_table_state.current_stage);
+    move_to_next_stage_from_card_deal();
 }
 
 void holdem_table_state_manager::set_turn(const std::string &card)
@@ -115,7 +143,7 @@ void holdem_table_state_manager::set_turn(const std::string &card)
     _table_state.communal_cards += ' ';
     _table_state.communal_cards += card;
 
-    _table_state.current_stage = get_next_game_stage(_table_state.current_stage);
+    move_to_next_stage_from_card_deal();
 }
 
 void holdem_table_state_manager::set_river(const std::string &card)
@@ -125,7 +153,7 @@ void holdem_table_state_manager::set_river(const std::string &card)
     _table_state.communal_cards += ' ';
     _table_state.communal_cards += card;
 
-    _table_state.current_stage = get_next_game_stage(_table_state.current_stage);
+    move_to_next_stage_from_card_deal();
 }
 
 void holdem_table_state_manager::set_acting_player_action(const player_action_t &action)
@@ -153,9 +181,18 @@ void holdem_table_state_manager::set_acting_player_action(const player_action_t 
 
     std::visit([this](const auto& arg){ handle_betting_player_action(arg); }, action);
 
-    if (_table_state.get_active_player_count() < 2)
+    // Are there enough players who haven't folded yet?
+    const auto active_player_count = _table_state.get_active_player_count();
+    if (active_player_count < 2)
     {
         _table_state.current_stage = game_stages::showdown;
+        return;
+    }
+
+    // Are there enough players who can raise? If not then we just need to learn what all the communal cards are
+    if (_table_state.get_active_and_not_all_in_player_count() < 2)
+    {
+        _table_state.current_stage = get_next_card_deal_turn(_table_state.current_stage);
         return;
     }
 
@@ -284,6 +321,13 @@ std::vector<split_pot> holdem_table_state_manager::execute_showdown(const std::u
     _table_state.current_stage = get_next_game_stage(_table_state.current_stage);
 
     return split_pots;
+}
+
+void holdem_table_state_manager::move_to_next_stage_from_card_deal()
+{
+    // Are there enough players who can raise? If not then we just need to learn what all the communal cards are
+    const bool not_enough_players = _table_state.get_active_and_not_all_in_player_count() < 2;
+    _table_state.current_stage = not_enough_players ? get_next_card_deal_turn(_table_state.current_stage) : get_next_game_stage(_table_state.current_stage);
 }
 
 } // end of namespace poker_lib
