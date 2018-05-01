@@ -153,6 +153,12 @@ void holdem_table_state_manager::set_acting_player_action(const player_action_t 
 
     std::visit([this](const auto& arg){ handle_betting_player_action(arg); }, action);
 
+    if (_table_state.get_active_player_count() < 2)
+    {
+        _table_state.current_stage = game_stages::showdown;
+        return;
+    }
+
     const bool is_betting_still_ongoing = _table_state.move_to_next_betting_player();
     if (!is_betting_still_ongoing)
     {
