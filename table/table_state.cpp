@@ -95,6 +95,37 @@ bool table_state::may_act_in_betting_round(size_t player_pos) const
     return has_taken_no_action || need_to_contribute_to_stay_in;
 }
 
+bool table_state::start_new_round()
+{
+    for (size_t pos = 0; pos < players.size();)
+    {
+        player_state& player = players.at(pos);
+
+        if (player.current_stack < big_blind_size)
+        {
+            players.erase(std::next(players.begin(), pos));
+            if (pos <= dealer_pos) { --dealer_pos; }
+            if (pos <= acting_player_pos) { --acting_player_pos; }
+        }
+        else
+        {
+            player.per_game_state = {};
+            player.per_betting_state = {};
+
+            ++pos;
+        }
+    }
+
+    pot = 0;
+    total_contribution_to_stay_in_game = 0;
+    communal_cards.clear();
+
+    elect_next_acting_player_after_betting();
+    dealer_pos = acting_player_pos;
+
+    return players.size() > 1;
+}
+
 bool operator==(const table_state &lhs, const table_state &rhs)
 {
     return lhs.current_stage == rhs.current_stage &&

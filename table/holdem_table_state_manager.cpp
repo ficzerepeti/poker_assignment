@@ -67,8 +67,9 @@ holdem_table_state_manager::holdem_table_state_manager(const std::vector<initial
 
     _table_state.small_blind_size = small_blind_size;
     _table_state.big_blind_size = big_blind_size;
+    _table_state.dealer_pos = dealer_position;
 
-    set_up_table(dealer_position);
+    set_up_table();
 }
 
 void holdem_table_state_manager::set_pocket_cards(size_t player_pos, const std::string &cards)
@@ -211,6 +212,7 @@ void holdem_table_state_manager::handle_betting_player_action(const player_actio
 std::vector<split_pot> holdem_table_state_manager::execute_showdown(const std::unordered_set<size_t> &winner_positions)
 {
     throw_if_unexpected_call(_table_state.current_stage, game_stages::showdown, __func__);
+    _table_state.current_stage = game_stages::end_of_round;
 
     const auto& players = _table_state.players;
 
@@ -271,53 +273,33 @@ std::vector<split_pot> holdem_table_state_manager::execute_showdown(const std::u
         }
     }
 
-    _table_state.current_stage = get_next_game_stage(_table_state.current_stage);
-
     return split_pots;
 }
 
 bool holdem_table_state_manager::start_new_round()
 {
     throw_if_unexpected_call(_table_state.current_stage, game_stages::end_of_round, __func__);
-
-    auto iter = _table_state.players.begin();
-    while (iter != _table_state.players.end())
-    {
-        player_state& player = *iter;
-
-        if (player.current_stack > _table_state.big_blind_size)
-        {
-            iter = _table_state.players.erase(iter);
-        }
-        else
-        {
-            player.per_game_state = {};
-            player.per_betting_state = {};
-
-            ++iter;
-        }
-    }
-
-    if (_table_state.players.size() < 2)
-    {
-        return false;
-    }
-
     _table_state.current_stage = game_stages::deal_pocket_cards;
-    return true;
+
+    if (_table_state.start_new_round())
+    {
+        set_up_table();
+        return true;
+    }
+    return false;
 }
 
-void holdem_table_state_manager::set_up_table(const size_t dealer_position)
+void holdem_table_state_manager::set_up_table()
 {
     _table_state.current_stage = game_stages::deal_pocket_cards;
     if (_table_state.players.size() < 2)
     {
         throw std::invalid_argument("Not enough players: " + std::to_string(_table_state.players.size()));
     }
-    if (_table_state.players.size() <= dealer_position)
+    if (_table_state.players.size() <= _table_state.dealer_pos)
     {
         std::ostringstream oss;
-        oss << "Player count " << _table_state.players.size() << " is not enough to have the dealer at position (zero indexed) " << dealer_position;
+        oss << "Player count " << _table_state.players.size() << " is not enough to have the dealer at position (zero indexed) " << _table_state.dealer_pos;
         throw std::invalid_argument(oss.str());
     }
     if (_table_state.small_blind_size >= _table_state.big_blind_size)
@@ -327,11 +309,9 @@ void holdem_table_state_manager::set_up_table(const size_t dealer_position)
         throw std::invalid_argument(oss.str());
     }
 
-    _table_state.dealer_pos = dealer_position;
-
     // Heads-up has special rules
     const bool is_heads_up = _table_state.players.size() == 2;
-    _table_state.acting_player_pos = is_heads_up ? dealer_position : get_next_pos(dealer_position, _table_state.players.size());
+    _table_state.acting_player_pos = is_heads_up ? _table_state.dealer_pos : get_next_pos(_table_state.dealer_pos, _table_state.players.size());
 
     auto &small_blind = _table_state.get_acting_player();
     if (small_blind.current_stack < _table_state.small_blind_size)

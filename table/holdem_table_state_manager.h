@@ -45,7 +45,7 @@ private:
     void handle_betting_player_action(const player_action_check_or_call &action);
     void handle_betting_player_action(const player_action_raise &action);
 
-    void set_up_table(size_t dealer_position);
+    void set_up_table();
 
     void move_to_next_stage_from_card_deal();
 

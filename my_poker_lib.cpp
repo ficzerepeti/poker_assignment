@@ -91,6 +91,8 @@ player_analysis my_poker_lib::make_acting_player_analysis(const table_state &tab
 {
     player_analysis analysis;
 
+    // TODO: take minimum amount to call into account
+
     analysis.equity = calculate_equities(table).at(table.acting_player_pos);
     analysis.pot_equity = calculate_pot_equity(table.pot, table.get_acting_player_amount_to_call());
 
@@ -102,8 +104,8 @@ player_analysis my_poker_lib::make_acting_player_analysis(const table_state &tab
     }
     else if (const auto max_plus_ev_increment = calculate_increment_to_get_pot_eq(table.pot, analysis.equity); max_plus_ev_increment >= min_raise)
     {
-        const auto max_raise = static_cast<const uint64_t>(table.pot * raise_pot_ratio_end);
-        analysis.recommended_action = player_action_raise{std::min(max_raise, max_plus_ev_increment)};
+        const auto max_raise = std::min(static_cast<const uint64_t>(table.pot * raise_pot_ratio_end), max_plus_ev_increment);
+        analysis.recommended_action = player_action_raise{std::min(max_raise, table.get_acting_player().current_stack)};
     }
     else
     {

@@ -43,6 +43,8 @@ struct table_state
 
     // Sets acting player to the first active player after the dealer.
     void elect_next_acting_player_after_betting();
+
+    bool start_new_round();
 };
 bool operator==(const table_state &lhs, const table_state &rhs);
 std::ostream &operator<<(std::ostream &os, const table_state &state);
