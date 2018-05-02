@@ -100,7 +100,7 @@ player_action_t holdem_game_orchestrator::get_acting_player_action()
         return _user_interaction.get_opponent_action();
     }
 
-    const auto analysis = _poker_lib.make_acting_player_analysis(table);
+    const auto analysis = _poker_lib.make_acting_player_analysis(table, 0.75, 1);
 
     std::ostringstream oss;
     oss << "Your equity of winning is " << (100 * analysis.equity)

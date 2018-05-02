@@ -24,7 +24,9 @@ public:
 
     virtual size_t get_num_of_parsed_cards(const std::string &cards) const = 0;
 
-    virtual player_analysis make_acting_player_analysis(const table_state &table) = 0;
+    virtual player_analysis make_acting_player_analysis(const table_state &table,
+                                                            double raise_pot_ratio_begin,
+                                                            double raise_pot_ratio_end) = 0;
     virtual std::unordered_set<size_t> get_winner_positions(const table_state &table) = 0;
 };
 

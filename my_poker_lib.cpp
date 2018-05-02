@@ -85,22 +85,25 @@ size_t my_poker_lib::get_num_of_parsed_cards(const std::string &cards) const
     return omp::bitCount(omp::CardRange::getCardMask(cards));
 }
 
-player_analysis my_poker_lib::make_acting_player_analysis(const table_state &table)
+player_analysis my_poker_lib::make_acting_player_analysis(const table_state &table,
+                                                          const double raise_pot_ratio_begin,
+                                                          const double raise_pot_ratio_end)
 {
     player_analysis analysis;
 
     analysis.equity = calculate_equities(table).at(table.acting_player_pos);
     analysis.pot_equity = calculate_pot_equity(table.pot, table.get_acting_player_amount_to_call());
 
-    const auto fixed_raise = table.pot * 2 / 3;
+    const auto min_raise = table.pot * raise_pot_ratio_begin;
 
     if (analysis.pot_equity > analysis.equity)
     {
         analysis.recommended_action = player_action_fold{};
     }
-    else if (const auto max_plus_ev_increment = calculate_increment_to_get_pot_eq(table.pot, analysis.equity); max_plus_ev_increment > fixed_raise)
+    else if (const auto max_plus_ev_increment = calculate_increment_to_get_pot_eq(table.pot, analysis.equity); max_plus_ev_increment >= min_raise)
     {
-        analysis.recommended_action = player_action_raise{fixed_raise};
+        const auto max_raise = static_cast<const uint64_t>(table.pot * raise_pot_ratio_end);
+        analysis.recommended_action = player_action_raise{std::min(max_raise, max_plus_ev_increment)};
     }
     else
     {
