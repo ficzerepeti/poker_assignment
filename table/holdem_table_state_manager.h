@@ -38,10 +38,14 @@ public:
 
     std::vector<split_pot> execute_showdown(const std::unordered_set<size_t> &winner_positions) override;
 
+    bool start_new_round() override;
+
 private:
     void handle_betting_player_action(const player_action_fold &action);
     void handle_betting_player_action(const player_action_check_or_call &action);
     void handle_betting_player_action(const player_action_raise &action);
+
+    void set_up_table(size_t dealer_position);
 
     void move_to_next_stage_from_card_deal();
 

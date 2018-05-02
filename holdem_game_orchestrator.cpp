@@ -80,8 +80,12 @@ void holdem_game_orchestrator::run_game()
             execute_showdown();
             break;
 
-        case game_stages::end_of_game:
-            // TODO: new game?
+        case game_stages::end_of_round:
+            if (_table_state_manager.start_new_round())
+            {
+                _user_interaction.notify_player("Round ended and now starting a new one.");
+                break;
+            }
             _user_interaction.notify_player("Game ended, bye!");
             return;
         }

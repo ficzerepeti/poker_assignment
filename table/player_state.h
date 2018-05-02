@@ -33,7 +33,7 @@ struct player_state
     per_game_player_state per_game_state{};
     per_betting_player_state per_betting_state{};
 
-    const std::string player_name;
+    std::string player_name;
 
     bool is_all_in() const { return current_stack == 0 && !per_game_state.has_folded; }
     bool has_folded() const { return per_game_state.has_folded; }

@@ -33,6 +33,10 @@ public:
     virtual void set_acting_player_action(const player_action_t &action) = 0;
 
     virtual std::vector<split_pot> execute_showdown(const std::unordered_set<size_t> &winner_positions) = 0;
+
+    // Sets up a new round by moving the dealer to the next player, eliminates players with not enough stack and clears per round state.
+    // Returns true if there are enough players to continue the game. False otherwise.
+    virtual bool start_new_round() = 0;
 };
 
 } // end of namespace poker_lib

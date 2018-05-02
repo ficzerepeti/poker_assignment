@@ -1,4 +1,5 @@
 #include <cctype>
+#include <locale>
 #include <string>
 #include <sstream>
 #include "streamed_user_interaction.h"

@@ -19,17 +19,10 @@ std::ostream &operator<<(std::ostream &os, const game_stages stage)
     HANDLE_GAME_STAGE_OSTREAM(deal_river_card);
     HANDLE_GAME_STAGE_OSTREAM(river_betting_round);
     HANDLE_GAME_STAGE_OSTREAM(showdown);
-    HANDLE_GAME_STAGE_OSTREAM(end_of_game);
+    HANDLE_GAME_STAGE_OSTREAM(end_of_round);
     }
 
     return os << "unknown";
-}
-
-std::string to_string(const game_stages stage)
-{
-    std::ostringstream oss;
-    oss << stage;
-    return oss.str();
 }
 
 game_stages get_next_game_stage(const game_stages stage)
@@ -37,7 +30,7 @@ game_stages get_next_game_stage(const game_stages stage)
     using game_stages_under_t = std::underlying_type<game_stages>::type;
 
     const auto stage_val = static_cast<game_stages_under_t>(stage);
-    const bool is_okay_to_increment = stage_val < static_cast<game_stages_under_t>(game_stages::end_of_game);
+    const bool is_okay_to_increment = stage_val < static_cast<game_stages_under_t>(game_stages::end_of_round);
 
     return static_cast<game_stages>(is_okay_to_increment ? (stage_val + 1) : stage_val);
 }

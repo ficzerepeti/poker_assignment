@@ -104,7 +104,7 @@ std::vector<player_action_t> &player_state::get_actions(const game_stages stage)
     case game_stages::deal_river_card:
     case game_stages::river_betting_round:
     case game_stages::showdown:
-    case game_stages::end_of_game:
+    case game_stages::end_of_round:
         return per_betting_state.river_bets;
     }
 
@@ -130,7 +130,7 @@ const std::vector<player_action_t> &player_state::get_actions(game_stages stage)
     case game_stages::deal_river_card:
     case game_stages::river_betting_round:
     case game_stages::showdown:
-    case game_stages::end_of_game:
+    case game_stages::end_of_round:
         return per_betting_state.river_bets;
     }
 
