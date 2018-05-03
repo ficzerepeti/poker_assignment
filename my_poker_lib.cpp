@@ -91,26 +91,29 @@ player_analysis my_poker_lib::make_acting_player_analysis(const table_state &tab
 {
     player_analysis analysis;
 
-    // TODO: take minimum amount to call into account
+    const auto amount_to_call = table.get_acting_player_amount_to_call();
 
     analysis.equity = calculate_equities(table).at(table.acting_player_pos);
-    analysis.pot_equity = calculate_pot_equity(table.pot, table.get_acting_player_amount_to_call());
-
-    const auto min_raise = table.pot * raise_pot_ratio_begin;
+    analysis.pot_equity = calculate_pot_equity(table.pot, amount_to_call);
 
     if (analysis.pot_equity > analysis.equity)
     {
         analysis.recommended_action = player_action_fold{};
+        return analysis;
     }
-    else if (const auto max_plus_ev_increment = calculate_increment_to_get_pot_eq(table.pot, analysis.equity); max_plus_ev_increment >= min_raise)
-    {
-        const auto max_raise = std::min(static_cast<const uint64_t>(table.pot * raise_pot_ratio_end), max_plus_ev_increment);
-        analysis.recommended_action = player_action_raise{std::min(max_raise, table.get_acting_player().current_stack)};
-    }
-    else
+
+    const auto max_plus_ev_increment = calculate_increment_to_get_pot_eq(table.pot, analysis.equity);
+    if (const auto min_raise = amount_to_call + table.pot * raise_pot_ratio_begin; max_plus_ev_increment < min_raise)
     {
         analysis.recommended_action = player_action_check_or_call{};
+        return analysis;
     }
+
+    auto max_raise = amount_to_call + static_cast<uint64_t>(table.pot * raise_pot_ratio_end);
+    max_raise = std::min(max_raise, max_plus_ev_increment);
+    max_raise = std::min(max_raise, table.get_acting_player().current_stack);
+
+    analysis.recommended_action = player_action_raise{max_raise};
 
     return analysis;
 }
