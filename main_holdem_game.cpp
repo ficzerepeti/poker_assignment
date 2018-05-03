@@ -34,7 +34,7 @@ static size_t get_user_position()
     std::string input;
     while (std::getline(std::cin, input) && !input.empty())
     {
-        return std::stoull(input) - 1;
+        return static_cast<size_t>(std::stoull(input) - 1);
     }
 
     throw std::runtime_error("Cannot read user position");

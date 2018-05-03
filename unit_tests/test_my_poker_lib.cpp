@@ -40,12 +40,12 @@ TEST(test_my_poker_lib, get_winner_positions)
 
     {
         const auto result = poker_lib.get_winner_positions(table);
-        EXPECT_EQ(result, std::unordered_set<uint64_t>{0});
+        EXPECT_EQ(result, std::unordered_set<size_t>{0});
     }
     {
         players.front().per_game_state.pocket_cards = "Jh Th";
         const auto result = poker_lib.get_winner_positions(table);
-        const std::unordered_set<uint64_t> expected{0, 1};
+        const std::unordered_set<size_t> expected{0, 1};
         EXPECT_EQ(result, expected);
     }
 }
