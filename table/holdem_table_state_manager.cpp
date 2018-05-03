@@ -143,18 +143,21 @@ void holdem_table_state_manager::set_acting_player_action(const player_action_t 
         return;
     }
 
+    const bool is_betting_still_ongoing = _table_state.move_to_next_betting_player();
+    if (is_betting_still_ongoing)
+    {
+        return;
+    }
+
+    _table_state.elect_next_acting_player_after_betting();
+
     // Are there enough players who can raise? If not then we just need to learn what all the communal cards are
     if (_table_state.get_active_and_not_all_in_player_count() < 2)
     {
         _table_state.current_stage = get_next_card_deal_turn(_table_state.current_stage);
-        return;
     }
-
-    const bool is_betting_still_ongoing = _table_state.move_to_next_betting_player();
-    if (!is_betting_still_ongoing)
+    else
     {
-        _table_state.elect_next_acting_player_after_betting();
-
         const bool at_least_two_left = _table_state.get_active_player_count() > 1;
         _table_state.current_stage = at_least_two_left ? get_next_game_stage(_table_state.current_stage) : game_stages::showdown;
     }
