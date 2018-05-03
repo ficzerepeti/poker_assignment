@@ -113,7 +113,14 @@ player_analysis my_poker_lib::make_acting_player_analysis(const table_state &tab
     max_raise = std::min(max_raise, max_plus_ev_increment);
     max_raise = std::min(max_raise, table.get_acting_player().current_stack);
 
-    analysis.recommended_action = player_action_raise{max_raise};
+    if (max_raise > amount_to_call)
+    {
+        analysis.recommended_action = player_action_raise{max_raise - amount_to_call};
+    }
+    else
+    {
+        analysis.recommended_action = player_action_check_or_call{};
+    }
 
     return analysis;
 }
